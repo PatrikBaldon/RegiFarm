@@ -9,6 +9,9 @@ on:
       - 'v*'  # Es: v1.0.0, v1.0.1
   workflow_dispatch:  # Permette di lanciare manualmente da GitHub Actions
 
+permissions:
+  contents: write  # Necessario per creare Release e caricare gli installer
+
 jobs:
   build-windows:
     name: Build for Windows

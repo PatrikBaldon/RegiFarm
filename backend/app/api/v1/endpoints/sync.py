@@ -141,16 +141,16 @@ SYNC_ORDER = [
 ]
 
 # Limiti per tabella per prevenire OOM (memoria costante con streaming)
-# None = nessun limite (tabelle piccole), 500 = medie, 200 = grandi
+# None = nessun limite (tabelle piccole). Aziende con molti capi possono avere migliaia di animali.
 SYNC_TABLE_LIMITS: Dict[str, Optional[int]] = {
     'aziende': 10,
     'sedi': 500,
     'stabilimenti': 500,
     'box': 2000,
-    'animali': 200,
+    'animali': 10000,  # Aumentato da 200: le aziende bovine possono avere migliaia di capi
     'fornitori': 500,
-    'fatture_amministrazione': 200,
-    'partite_animali': 500,
+    'fatture_amministrazione': 5000,
+    'partite_animali': 1000,
     'terreni': 500,
     'attrezzature': 500,
     'farmaci': 500,
@@ -159,7 +159,7 @@ SYNC_TABLE_LIMITS: Dict[str, Optional[int]] = {
     'pn_conti': 500,
     'pn_preferenze': 10,
     'pn_categorie': 500,
-    'pn_movimenti': 200,
+    'pn_movimenti': 5000,
     'cicli_terreno': 500,
     'cicli_terreno_fasi': 2000,
     'cicli_terreno_costi': 2000,
