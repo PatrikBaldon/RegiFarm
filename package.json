@@ -78,7 +78,6 @@
           ]
         }
       ],
-      "icon": "electron-app/public/icons/icon.icns",
       "category": "public.app-category.business"
     },
     "dmg": {
