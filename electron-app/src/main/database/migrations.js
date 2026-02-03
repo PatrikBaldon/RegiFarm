@@ -65,6 +65,7 @@ function applyMigrations() {
         DROP TABLE IF EXISTS assicurazioni_aziendali;
         DROP TABLE IF EXISTS contratti_soccida;
         DROP TABLE IF EXISTS impostazioni;
+        DROP TABLE IF EXISTS movimentazioni;
       `;
       
       localDb.db.exec(dropTables);

@@ -262,8 +262,14 @@ class LocalDatabase {
       const tableInfo = this.db.prepare(`PRAGMA table_info(${table})`).all();
       const tableColumns = new Set(tableInfo.map(col => col.name));
 
-      let query = `SELECT * FROM ${table} WHERE deleted_at IS NULL`;
+      const hasDeletedAt = tableColumns.has('deleted_at');
+      let query = `SELECT * FROM ${table}`;
       const params = [];
+      if (hasDeletedAt) {
+        query += ` WHERE deleted_at IS NULL`;
+      } else {
+        query += ` WHERE 1=1`;
+      }
 
       // Aggiungi filtri (solo se la colonna esiste nella tabella e il valore è un tipo supportato da SQLite)
       for (const [key, value] of Object.entries(filters)) {

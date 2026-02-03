@@ -1163,9 +1163,10 @@ const AnimaleDetail = ({ animale, onClose, onUpdate, initialDetail = null }) => 
     return options;
   }, [contrattiSoccida, currentContrattoId, contrattoDetail, resolveContrattoLabel]);
 
+  const currentContractStr = currentContrattoId != null ? String(currentContrattoId) : '';
   const hasPendingContractChange =
     pendingContrattoId !== undefined &&
-    contractSelectValue !== (currentContrattoId ? String(currentContrattoId) : '');
+    String(contractSelectValue || '') !== String(currentContractStr || '');
 
   const contractEditorVisible = isEditing || contractEditorOpen;
   const hasContrattoAssociato = !!currentContrattoId;
@@ -1919,7 +1920,7 @@ const AnimaleDetail = ({ animale, onClose, onUpdate, initialDetail = null }) => 
             <button type="button" className="btn btn-secondary" onClick={handleCancelPesoModal} disabled={savingContratto}>
               Annulla
             </button>
-            <button type="button" className="btn btn-primary" onClick={handleConfirmPesoModal} disabled={savingContratto || !pesoModalData.peso.trim()}>
+            <button type="button" className="btn btn-primary" onClick={handleConfirmPesoModal} disabled={savingContratto}>
               {savingContratto ? 'Salvataggio...' : 'Conferma'}
             </button>
           </>
@@ -1929,8 +1930,8 @@ const AnimaleDetail = ({ animale, onClose, onUpdate, initialDetail = null }) => 
           Inserisci il peso di riferimento per l'inizio del nuovo conteggio. Questo peso verrà registrato nel log degli eventi.
         </p>
         <div className="form-grid">
-          <div className="form-group span-6">
-            <label>Peso (kg) *</label>
+            <div className="form-group span-6">
+            <label>Peso (kg)</label>
             <input
               type="number"
               step="0.01"

@@ -10,7 +10,7 @@
  * - local_updated_at: timestamp dell'ultima modifica locale
  */
 
-const SCHEMA_VERSION = 9; // Incrementato per aggiungere deleted_at a cicli_terreno_fasi e cicli_terreno_costi
+const SCHEMA_VERSION = 10; // Aggiunto deleted_at a movimentazioni
 
 /**
  * Schema SQL per creare tutte le tabelle
@@ -974,6 +974,8 @@ CREATE TABLE IF NOT EXISTS movimentazioni (
   motivo TEXT,
   note TEXT,
   created_at TEXT,
+  updated_at TEXT,
+  deleted_at TEXT,
   -- Campi sync
   synced_at TEXT,
   sync_status TEXT DEFAULT 'synced',
