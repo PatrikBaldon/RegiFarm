@@ -2,21 +2,9 @@
 
 Questa guida spiega come generare l'installer Windows per gli utenti tester e come configurarlo.
 
-## Setup iniziale del repository
+## Stato del repository
 
-**Importante**: GitHub Actions cerca `.github/workflows/` nella root del repository. Per far funzionare i workflow, il contenuto di **RegiFarm-Pro** deve essere nella root del repo.
-
-```bash
-cd /path/to/RegiFarm-Pro
-git init
-git remote add origin https://github.com/PatrikBaldon/RegiFarm.git
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git push -u origin main
-```
-
-Se hai già un repo con struttura diversa, assicurati che `package.json`, `backend/`, `electron-app/` e `.github/` siano nella root.
+Il codice è già stato pushato su [https://github.com/PatrikBaldon/RegiFarm](https://github.com/PatrikBaldon/RegiFarm). La struttura è corretta: `package.json`, `backend/`, `electron-app/` e `.github/workflows/` sono nella root del repo.
 
 ---
 
