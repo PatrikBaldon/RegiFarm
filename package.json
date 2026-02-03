@@ -66,8 +66,7 @@
             "x64"
           ]
         }
-      ],
-      "icon": "electron-app/public/icons/icon.ico"
+      ]
     },
     "mac": {
       "target": [
@@ -79,7 +78,6 @@
           ]
         }
       ],
-      "icon": "electron-app/public/icons/icon.icns",
       "category": "public.app-category.business"
     },
     "dmg": {
