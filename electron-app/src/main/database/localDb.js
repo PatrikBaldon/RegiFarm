@@ -86,6 +86,7 @@ class LocalDatabase {
           DROP TABLE IF EXISTS pn_preferenze;
           DROP TABLE IF EXISTS pn_categorie;
           DROP TABLE IF EXISTS pn_conti;
+          DROP TABLE IF EXISTS decessi;
           DROP TABLE IF EXISTS partite_animali_animali;
           DROP TABLE IF EXISTS partite_animali;
           DROP TABLE IF EXISTS somministrazioni;
@@ -696,6 +697,41 @@ class LocalDatabase {
 
   updateAnimale(id, updates) {
     return this.update('animali', id, updates);
+  }
+
+  // --- DECESSI ---
+  getDecessoByAnimaleId(animaleId) {
+    const rows = this.select('decessi', { animale_id: animaleId }, { limit: 1 });
+    return rows && rows.length > 0 ? rows[0] : null;
+  }
+
+  updateDecessoByAnimaleId(animaleId, updates) {
+    if (!this.isAvailable()) return false;
+    const decesso = this.getDecessoByAnimaleId(animaleId);
+    if (!decesso) return false;
+    return this.update('decessi', decesso.id, updates, false); // non marcare pending - sync gestisce decessi via backend
+  }
+
+  upsertDecesso(data) {
+    if (!this.isAvailable()) return null;
+    try {
+      const existing = this.getDecessoByAnimaleId(data.animale_id);
+      const now = new Date().toISOString();
+      if (existing) {
+        const updates = { ...data };
+        delete updates.id;
+        delete updates.animale_id;
+        delete updates.created_at;
+        this.update('decessi', existing.id, updates, false);
+        return existing.id;
+      } else {
+        const res = this.insert('decessi', { ...data, created_at: now, updated_at: now }, false);
+        return res ? res.id : null;
+      }
+    } catch (e) {
+      console.error('[LocalDb] Errore upsertDecesso:', e);
+      return null;
+    }
   }
 
   // --- SEDI ---

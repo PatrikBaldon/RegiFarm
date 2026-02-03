@@ -4,6 +4,7 @@
  */
 import api from '../../../services/api';
 import hybridDataService from '../../../services/hybridDataService';
+import localDataService from '../../../services/localDataService';
 
 export const allevamentoService = {
   // Sedi - usa database locale per letture
@@ -74,10 +75,33 @@ export const allevamentoService = {
   checkAnimaleUpdateImpact: async (id, updateData) => {
     return api.post(`/allevamento/animali/${id}/check-update-impact`, updateData);
   },
-  updateValoreDecesso: (animaleId, valoreCapo) => 
-    api.put(`/allevamento/animali/${animaleId}/decesso/valore`, { valore_capo: valoreCapo }),
-  updateResponsabileDecesso: (animaleId, responsabile) => 
-    api.put(`/allevamento/animali/${animaleId}/decesso/responsabile`, { responsabile }),
+  updateValoreDecesso: async (animaleId, valoreCapo) => {
+    const response = await api.put(`/allevamento/animali/${animaleId}/decesso/valore`, { valore_capo: valoreCapo });
+    // Aggiorna subito il DB locale per feedback immediato
+    if (localDataService.isAvailable) {
+      try {
+        await localDataService.updateDecessoByAnimaleId(animaleId, { valore_capo: valoreCapo });
+      } catch (e) { /* ignorare errori locale */ }
+    }
+    return response;
+  },
+  updateResponsabileDecesso: async (animaleId, responsabile) => {
+    await api.put(`/allevamento/animali/${animaleId}/decesso/responsabile`, { responsabile });
+    // Aggiorna subito il DB locale per feedback immediato
+    if (localDataService.isAvailable) {
+      try {
+        await localDataService.updateDecessoByAnimaleId(animaleId, { responsabile });
+      } catch (e) { /* ignorare errori locale */ }
+    }
+  },
+  /** Aggiorna il decesso nel DB locale (valore e/o responsabile) - usato dopo salvataggio modifica generale */
+  updateDecessoLocale: async (animaleId, updates) => {
+    if (localDataService.isAvailable && Object.keys(updates).length > 0) {
+      try {
+        await localDataService.updateDecessoByAnimaleId(animaleId, updates);
+      } catch (e) { /* ignorare errori locale */ }
+    }
+  },
   updateValorePartita: (animaleId, data) => 
     api.put(`/allevamento/animali/${animaleId}/partita/valore`, data),
   updateValoreAnimale: (animaleId, valore, extendToPartita = false) => 

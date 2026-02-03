@@ -434,7 +434,7 @@ class SyncManager {
         // Nota: componenti_alimentari e mangimi_confezionati non sono supportate dal backend sync
         // Vengono gestite separatamente tramite endpoint alimentazione
         const tableOrder = [
-          'aziende', 'sedi', 'stabilimenti', 'box', 'animali',
+          'aziende', 'sedi', 'stabilimenti', 'box', 'animali', 'decessi',
           'fornitori', 'fatture_amministrazione', 'partite_animali',
           'terreni', 'attrezzature', 'farmaci',
           'assicurazioni_aziendali', 'contratti_soccida',

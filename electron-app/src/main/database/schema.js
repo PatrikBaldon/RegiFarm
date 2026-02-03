@@ -10,7 +10,7 @@
  * - local_updated_at: timestamp dell'ultima modifica locale
  */
 
-const SCHEMA_VERSION = 10; // Aggiunto deleted_at a movimentazioni
+const SCHEMA_VERSION = 11; // Aggiunta tabella decessi per sincronizzazione locale
 
 /**
  * Schema SQL per creare tutte le tabelle
@@ -211,6 +211,37 @@ CREATE INDEX IF NOT EXISTS idx_animali_auricolare ON animali(auricolare);
 CREATE INDEX IF NOT EXISTS idx_animali_codice_elettronico ON animali(codice_elettronico);
 CREATE INDEX IF NOT EXISTS idx_animali_codice_azienda ON animali(codice_azienda_anagrafe);
 CREATE INDEX IF NOT EXISTS idx_animali_sync ON animali(sync_status);
+
+-- ============================================
+-- DECESSI (per animali deceduti)
+-- ============================================
+CREATE TABLE IF NOT EXISTS decessi (
+  id INTEGER PRIMARY KEY,
+  animale_id INTEGER NOT NULL UNIQUE,
+  gruppo_decessi_id INTEGER,
+  data_ora TEXT,
+  causa TEXT,
+  note TEXT,
+  valore_capo REAL,
+  costi_fino_al_decesso REAL,
+  perdita_totale REAL,
+  tipo_contratto TEXT,
+  quota_decesso REAL,
+  responsabile TEXT DEFAULT 'soccidario',
+  giorni_dall_arrivo INTEGER,
+  entro_termine_responsabilita INTEGER,
+  limite_esonero REAL,
+  fattura_smaltimento_id INTEGER,
+  costo_smaltimento REAL,
+  contratto_soccida_id INTEGER,
+  created_at TEXT,
+  updated_at TEXT,
+  local_updated_at TEXT,
+  synced_at TEXT,
+  sync_status TEXT DEFAULT 'synced',
+  FOREIGN KEY (animale_id) REFERENCES animali(id)
+);
+CREATE INDEX IF NOT EXISTS idx_decessi_animale ON decessi(animale_id);
 
 -- ============================================
 -- AMMINISTRAZIONE

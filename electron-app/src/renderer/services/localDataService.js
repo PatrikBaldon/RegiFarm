@@ -246,6 +246,20 @@ class LocalDataService {
     return result;
   }
 
+  async updateDecessoByAnimaleId(animaleId, updates) {
+    if (!ipcRenderer) return false;
+    const result = await ipcRenderer.invoke('db:updateDecessoByAnimaleId', { animaleId, updates });
+    ipcRenderer.send('sync:trigger');
+    return result;
+  }
+
+  async upsertDecesso(data) {
+    if (!ipcRenderer) return null;
+    const result = await ipcRenderer.invoke('db:upsertDecesso', data);
+    ipcRenderer.send('sync:trigger');
+    return result;
+  }
+
   async deleteAnimale(id) {
     if (!ipcRenderer) return false;
     const result = await ipcRenderer.invoke('db:delete', { table: 'animali', id });

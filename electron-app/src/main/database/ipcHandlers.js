@@ -140,6 +140,14 @@ function registerDatabaseHandlers() {
     return localDb.updateAnimale(id, updates);
   });
 
+  ipcMain.handle('db:updateDecessoByAnimaleId', async (event, { animaleId, updates }) => {
+    return localDb.updateDecessoByAnimaleId(animaleId, updates);
+  });
+
+  ipcMain.handle('db:upsertDecesso', async (event, data) => {
+    return localDb.upsertDecesso(data);
+  });
+
   // --- SEDI ---
   ipcMain.handle('db:getSedi', async (event, filters) => {
     return localDb.getSedi(filters || {});

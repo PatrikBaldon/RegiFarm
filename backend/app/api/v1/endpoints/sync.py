@@ -26,6 +26,7 @@ from pydantic import BaseModel
 
 from app.core.database import get_db
 from app.models.allevamento.animale import Animale
+from app.models.allevamento.decesso import Decesso
 from app.models.allevamento.sede import Sede
 from app.models.allevamento.stabilimento import Stabilimento
 from app.models.allevamento.box import Box
@@ -104,6 +105,7 @@ TABLE_MODELS = {
     'stabilimenti': Stabilimento,
     'box': Box,
     'animali': Animale,
+    'decessi': Decesso,
     'fornitori': Fornitore,
     'fatture_amministrazione': FatturaAmministrazione,
     'partite_animali': PartitaAnimale,
@@ -132,7 +134,7 @@ TABLES_WITH_AZIENDA_ID = [
 
 # Ordine di sync per rispettare FK
 SYNC_ORDER = [
-    'aziende', 'sedi', 'stabilimenti', 'box', 'animali',
+    'aziende', 'sedi', 'stabilimenti', 'box', 'animali', 'decessi',
     'fornitori', 'fatture_amministrazione', 'partite_animali',
     'terreni', 'attrezzature', 'farmaci',
     'assicurazioni_aziendali', 'contratti_soccida',
@@ -148,6 +150,7 @@ SYNC_TABLE_LIMITS: Dict[str, Optional[int]] = {
     'stabilimenti': 500,
     'box': 2000,
     'animali': 10000,  # Aumentato da 200: le aziende bovine possono avere migliaia di capi
+    'decessi': 5000,
     'fornitori': 500,
     'fatture_amministrazione': 5000,
     'partite_animali': 1000,
@@ -271,6 +274,14 @@ def get_records_for_azienda(
         # Box filtrati per stabilimento_id
         if stabilimento_ids:
             query = query.filter(model.stabilimento_id.in_(stabilimento_ids))
+    elif table_name == 'decessi':
+        # Decessi filtrati per animale_id degli animali dell'azienda
+        from sqlalchemy import select
+        animale_ids_subquery = db.query(Animale.id).filter(
+            Animale.azienda_id == azienda_id,
+            Animale.deleted_at.is_(None)
+        ).subquery()
+        query = query.filter(model.animale_id.in_(select(animale_ids_subquery.c.id)))
     elif table_name == 'cicli_terreno_fasi':
         # Fasi filtrate per ciclo_id dei cicli dell'azienda (subquery)
         # Usa select() esplicitamente per evitare warning SQLAlchemy

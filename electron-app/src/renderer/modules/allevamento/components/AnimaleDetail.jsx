@@ -120,6 +120,9 @@ const AnimaleDetail = ({ animale, onClose, onUpdate, initialDetail = null }) => 
         data_provvvedimento: sourceData.data_provvvedimento ? (sourceData.data_provvvedimento.split('T')[0] || sourceData.data_provvvedimento) : '',
         origine_dati: sourceData.origine_dati || 'manuale',
         valore: sourceData.valore ? parseFloat(sourceData.valore).toFixed(2) : '',
+        // Campi decesso (per animali deceduti, modificabili in modifica generale)
+        decesso_valore_capo: sourceData.decesso?.valore_capo != null ? parseFloat(sourceData.decesso.valore_capo).toFixed(2) : '',
+        decesso_responsabile: sourceData.decesso?.responsabile || 'soccidario',
       });
     }
   }, [animale, animaleDetail, isEditing]);
@@ -852,6 +855,8 @@ const AnimaleDetail = ({ animale, onClose, onUpdate, initialDetail = null }) => 
         if (key === 'valore') return;
         // Salta lo stato - non può essere modificato da qui
         if (key === 'stato') return;
+        // Salta i campi decesso - gestiti separatamente in blocco decessi
+        if (key === 'decesso_valore_capo' || key === 'decesso_responsabile') return;
         // Salta i campi fattura - vengono gestiti dalle fatture
         if (key === 'fattura_emessa_id' || key === 'fattura_amministrazione_id' || key === '_fattura_emessa_id' || key === '_fattura_amministrazione_id') return;
         
@@ -940,6 +945,28 @@ const AnimaleDetail = ({ animale, onClose, onUpdate, initialDetail = null }) => 
           skipClose: true,
           refresh: false,
         });
+      }
+
+      // Aggiorna dati decesso se modificati (in modifica generale) - riflette anche nel DB locale
+      if (animale.stato === 'deceduto' && animaleDetail?.decesso) {
+        const v = animaleDetail.decesso.valore_capo;
+        const valoreOriginale = (v != null && !isNaN(parseFloat(v))) ? parseFloat(v).toFixed(2) : '';
+        const responsabileOriginale = animaleDetail.decesso.responsabile || 'soccidario';
+        const nuovoValore = String(formData.decesso_valore_capo ?? valoreDecesso ?? '').trim();
+        const nuovoResponsabile = formData.decesso_responsabile ?? responsabileDecesso ?? 'soccidario';
+        const valoreDecessoCambiato = nuovoValore !== valoreOriginale;
+        const responsabileDecessoCambiato = nuovoResponsabile !== responsabileOriginale;
+
+        if (valoreDecessoCambiato && animaleDetail.partita_ingresso_esterno?.valore_da_fattura === undefined) {
+          const valore = parseFloat(nuovoValore);
+          if (!isNaN(valore) && valore >= 0) {
+            await allevamentoService.updateValoreDecesso(animale.id, valore);
+          }
+        }
+        if (responsabileDecessoCambiato) {
+          await allevamentoService.updateResponsabileDecesso(animale.id, nuovoResponsabile);
+        }
+        if ((valoreDecessoCambiato || responsabileDecessoCambiato) && onUpdate) onUpdate();
       }
 
       // La gestione delle partite di uscita e fatture viene fatta dalla sincronizzazione anagrafe
@@ -1720,9 +1747,23 @@ const AnimaleDetail = ({ animale, onClose, onUpdate, initialDetail = null }) => 
                   </div>
                 ) : (
                   <div className="value-with-action">
-                    <span>{animaleDetail.decesso.valore_capo ? `€${parseFloat(animaleDetail.decesso.valore_capo).toFixed(2)}` : 'Non impostato'}</span>
-                    {!isEditing && (
-                      <button className="btn-edit-value" onClick={() => setEditingValoreDecesso(true)} title="Modifica valore">✏️</button>
+                    {isEditing ? (
+                      <div className="value-editor">
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={formData.decesso_valore_capo ?? valoreDecesso ?? ''}
+                          onChange={(e) => handleFieldChange('decesso_valore_capo', e.target.value)}
+                          className="form-input-small"
+                          placeholder="€"
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        <span>{animaleDetail.decesso.valore_capo ? `€${parseFloat(animaleDetail.decesso.valore_capo).toFixed(2)}` : 'Non impostato'}</span>
+                        <button className="btn-edit-value" onClick={() => setEditingValoreDecesso(true)} title="Modifica valore">✏️</button>
+                      </>
                     )}
                   </div>
                 )}
@@ -1760,9 +1801,23 @@ const AnimaleDetail = ({ animale, onClose, onUpdate, initialDetail = null }) => 
                     </div>
                   ) : (
                     <div className="value-with-action">
-                      <span className="font-weight-bold">{responsabileDecesso === 'soccidante' ? 'Soccidante' : 'Soccidario'}</span>
-                      {!isEditing && (
-                        <button className="btn-edit-value" onClick={() => setEditingResponsabileDecesso(true)} title="Modifica responsabile">✏️</button>
+                      {isEditing ? (
+                        <SimpleSelect
+                          className="select-compact select-small"
+                          options={[
+                            { value: 'soccidante', label: 'Soccidante' },
+                            { value: 'soccidario', label: 'Soccidario' }
+                          ]}
+                          value={formData.decesso_responsabile ?? responsabileDecesso ?? 'soccidario'}
+                          onChange={(e) => handleFieldChange('decesso_responsabile', e.target.value)}
+                          displayField="label"
+                          valueField="value"
+                        />
+                      ) : (
+                        <>
+                          <span className="font-weight-bold">{responsabileDecesso === 'soccidante' ? 'Soccidante' : 'Soccidario'}</span>
+                          <button className="btn-edit-value" onClick={() => setEditingResponsabileDecesso(true)} title="Modifica responsabile">✏️</button>
+                        </>
                       )}
                     </div>
                   )}
