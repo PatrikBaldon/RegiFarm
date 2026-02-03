@@ -1,0 +1,286 @@
+.registra-somministrazione {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.registra-somministrazione h3 {
+  margin: 0 0 24px 0;
+  color: #2c3e50;
+}
+
+.somministrazione-form {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Rimuove background, padding, border-radius e box-shadow quando il form è dentro BaseModal */
+.base-modal-body .somministrazione-form {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+
+/* Quando dentro BaseModal, usa gli stili di BaseModal.css */
+.base-modal-body .form-row {
+  /* BaseModal.css gestisce già form-row */
+}
+
+.base-modal-body .form-group {
+  /* BaseModal.css gestisce già form-group */
+}
+
+.base-modal-body .form-group label {
+  /* BaseModal.css gestisce già le label */
+}
+
+.base-modal-body .form-group input,
+.base-modal-body .form-group select,
+.base-modal-body .form-group textarea {
+  /* BaseModal.css gestisce già gli input */
+}
+
+.base-modal-body .form-group input:focus,
+.base-modal-body .form-group select:focus,
+.base-modal-body .form-group textarea:focus {
+  /* BaseModal.css gestisce già il focus */
+}
+
+/* Stili solo quando NON dentro BaseModal */
+.registra-somministrazione .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.registra-somministrazione .form-group {
+  margin-bottom: 16px;
+}
+
+.registra-somministrazione .form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #2c3e50;
+  font-size: 14px;
+}
+
+.registra-somministrazione .form-group input,
+.registra-somministrazione .form-group select,
+.registra-somministrazione .form-group textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.registra-somministrazione .form-group input:focus,
+.registra-somministrazione .form-group select:focus,
+.registra-somministrazione .form-group textarea:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.readonly-input {
+  background: #f8f9fa;
+  color: #666;
+  cursor: not-allowed;
+}
+
+/* I pulsanti devono essere nel footer della modale, non qui */
+/* Rimuoviamo form-actions quando dentro BaseModal */
+.base-modal-body .form-actions,
+.base-modal-body .form-actions-modal {
+  display: none;
+}
+
+/* Stili solo quando NON dentro BaseModal */
+.registra-somministrazione .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.registra-somministrazione .form-actions-modal {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.quantita-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quantita-input {
+  flex: 1;
+}
+
+.quantita-unit {
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  min-width: 60px;
+  text-align: center;
+}
+
+/* BaseModal.css gestisce già tutti gli stili per form-group, form-row, input, select, textarea */
+/* Non serve sovrascrivere nulla */
+
+/* Animal selector wrapper */
+.animal-selector-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.no-animals-selected {
+  color: #b0b0b0;
+  font-size: 1em;
+  margin-left: 4px;
+}
+
+.animals-selected-count {
+  color: #174c88;
+  font-weight: 500;
+  cursor: pointer;
+  margin-left: 4px;
+  text-decoration: underline #bbcff6;
+}
+
+/* Selector modal styles */
+.selector-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.selector-actions .loading-text {
+  color: #666;
+  font-size: 13px;
+  font-style: italic;
+}
+
+.selector-actions .info-text {
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 500;
+  margin-left: auto;
+}
+
+.selected-animals-list {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 8px;
+  background: #ffffff;
+  margin-bottom: 12px;
+}
+
+.selected-animals-list .selected-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+  margin-bottom: 4px;
+}
+
+.selected-animals-list .selected-item:hover {
+  background: #f3f4f6;
+}
+
+.selected-animals-list .selected-item:last-child {
+  margin-bottom: 0;
+}
+
+.selected-animals-list .animal-meta {
+  color: #6b7280;
+  font-size: 12px;
+  margin-left: auto;
+  font-style: italic;
+}
+
+.select-all-btn {
+  margin-bottom: 8px;
+}
+
+.footer-actions-group {
+  display: flex;
+  gap: 8px;
+}
+
+.selected-count {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Selected animals detail modal */
+.selected-animals-detail-list {
+  max-height: 180px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin: 12px 0;
+  padding-right: 22px;
+}
+
+.selected-animal-detail-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 0 5px 8px;
+  border-bottom: 1px solid #eee;
+  position: relative;
+}
+
+.selected-animal-detail-item:last-child {
+  border-bottom: none;
+}
+
+.animal-auricolare {
+  font-family: monospace;
+  font-size: 1.03em;
+  color: #1b2746;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.remove-animal-btn {
+  color: #c42d3a;
+  font-weight: 700;
+  font-size: 1.29em;
+  border: none;
+  background: none;
+  margin-left: 16px;
+  padding: 2px 12px 2px 4px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.16s;
+  position: relative;
+  right: -4px;
+}
+
+.remove-animal-btn:hover {
+  background: #ffe3e5;
+}
+

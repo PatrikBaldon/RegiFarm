@@ -1,0 +1,104 @@
+.gestione-contratti-soccida {
+  padding: 20px;
+}
+
+.gestione-contratti-soccida .header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.gestione-contratti-soccida .filters {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.gestione-contratti-soccida .header-actions-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.gestione-contratti-soccida .filters label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.gestione-contratti-soccida .action-buttons {
+  display: flex;
+  gap: 5px;
+}
+
+/* Badge nella tabella - dimensioni uniformi definite in App.css */
+.gestione-contratti-soccida .badge-success {
+  background-color: #28a745;
+  color: white;
+}
+
+.gestione-contratti-soccida .badge-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.table-row-clickable {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.table-row-clickable:hover {
+  background-color: #f3f4f6;
+}
+
+/* Regolazione larghezze colonne per evitare sovrapposizioni */
+.gestione-contratti-soccida .data-table th:nth-child(1),
+.gestione-contratti-soccida .data-table td:nth-child(1) {
+  width: 10%;
+  min-width: 120px;
+}
+
+.gestione-contratti-soccida .data-table th:nth-child(2),
+.gestione-contratti-soccida .data-table td:nth-child(2) {
+  width: 15%;
+  min-width: 150px;
+}
+
+.gestione-contratti-soccida .data-table th:nth-child(3),
+.gestione-contratti-soccida .data-table td:nth-child(3) {
+  width: 10%;
+  min-width: 100px;
+}
+
+.gestione-contratti-soccida .data-table th:nth-child(4),
+.gestione-contratti-soccida .data-table td:nth-child(4) {
+  width: 15%;
+  min-width: 140px;
+}
+
+.gestione-contratti-soccida .data-table th:nth-child(5),
+.gestione-contratti-soccida .data-table td:nth-child(5) {
+  width: 12%;
+  min-width: 110px;
+}
+
+.gestione-contratti-soccida .data-table th:nth-child(6),
+.gestione-contratti-soccida .data-table td:nth-child(6) {
+  width: 12%;
+  min-width: 110px;
+}
+
+.gestione-contratti-soccida .data-table th:nth-child(7),
+.gestione-contratti-soccida .data-table td:nth-child(7) {
+  width: 8%;
+  min-width: 80px;
+}
+
+.gestione-contratti-soccida .data-table th:nth-child(8),
+.gestione-contratti-soccida .data-table td:nth-child(8) {
+  width: 10%;
+  min-width: 100px;
+}
+

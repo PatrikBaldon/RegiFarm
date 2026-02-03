@@ -1,0 +1,95 @@
+.sedi-manager {
+  padding: 20px;
+}
+
+.manager-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.manager-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.manager-header button {
+  background: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.manager-header button:hover {
+  background: #0056b3;
+}
+
+/* Form modal styles removed - now using BaseModal */
+
+/* Form group styles removed - now using BaseModal.css styles */
+/* When inside BaseModal, form-group, label, input, select, textarea are styled by BaseModal.css */
+
+/* Form actions removed - buttons now in BaseModal footer */
+
+.table-container {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background: #f8f9fa;
+}
+
+th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 14px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+td {
+  padding: 12px;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 14px;
+}
+
+tbody tr:hover {
+  background: #f8f9fa;
+}
+
+td button {
+  margin-right: 8px;
+  border: 1px solid #e0e0e0;
+  background: white;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+td button:hover {
+  background: #f8f9fa;
+  border-color: #007bff;
+  color: #007bff;
+}
+
+td button.delete-btn:hover {
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+

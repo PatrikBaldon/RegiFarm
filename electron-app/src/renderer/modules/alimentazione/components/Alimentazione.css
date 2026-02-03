@@ -1,0 +1,546 @@
+/* Stili specifici del modulo - gli stili comuni sono in App.css */
+
+/* Stili rimossi - ora gestiti globalmente in App.css */
+
+.alimentazione-content {
+  overflow-y: auto;
+}
+
+/* Sezioni e blocchi */
+.alimentazione-section {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Toggle button - stesso stile Report Allevamento / modale nuovo componente */
+.alimentazione-section .toggle-button {
+  position: relative;
+  width: 38px;
+  height: 18px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  flex-shrink: 0;
+  display: inline-block;
+  outline: none;
+  box-sizing: border-box;
+  vertical-align: middle;
+  padding: 0;
+  margin: 0;
+}
+
+.alimentazione-section .toggle-button::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 14px;
+  height: 14px;
+  background: #d1d5db;
+  border-radius: 50%;
+  transition: transform 0.2s ease, background 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.alimentazione-section .toggle-button:hover:not(:disabled) {
+  border-color: #94a3b8;
+}
+
+.alimentazione-section .toggle-button.active {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.alimentazione-section .toggle-button.active::after {
+  transform: translateX(18px);
+  background: #ffffff;
+}
+
+.alimentazione-section .toggle-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.section-header h3 {
+  margin: 0;
+  color: #2c3e50;
+}
+
+.section-block {
+  /* Rimossi background bianco, border-radius, box-shadow e padding per consistenza con il resto dell'app */
+  /* Le sezioni ora sono direttamente sulla pagina senza sfondi */
+}
+
+.block-header h4 {
+  margin: 0 0 12px 0;
+  color: #2c3e50;
+}
+
+/* Header di blocco con azioni */
+.block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+/* Form inline */
+.inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.inline-form input,
+.inline-form select,
+.inline-form textarea {
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #fff;
+  color: #2c3e50;
+}
+
+.inline-form input:focus,
+.inline-form select:focus,
+.inline-form textarea:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.form-hint {
+  margin-top: 8px;
+  padding: 10px;
+  background: #e7f3ff;
+  border-left: 4px solid #007bff;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #2c3e50;
+}
+
+/* Pulsanti */
+.btn-primary {
+  background: #007bff;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+.btn-primary:hover { background: #0056b3; }
+.btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+
+.btn-secondary {
+  background: #6c757d;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+.btn-secondary:hover { background: #545b62; }
+
+.btn-link {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+}
+.btn-link:hover { text-decoration: underline; }
+
+.btn-danger {
+  background: #dc3545;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+.btn-danger:hover { background: #b02a37; }
+
+/* Tabelle */
+/* Spaziatura tabella */
+.table-container { 
+  overflow-x: auto; 
+  overflow-y: visible; /* Rimossa scrollbar verticale - lo scroll è gestito dal contenitore principale */
+  margin-top: 6px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Rimuove lo sfondo bianco quando il tbody è vuoto */
+.data-table:has(tbody:empty),
+.data-table tbody:empty {
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Rimuove lo sfondo anche quando c'è solo una riga con classe empty-state */
+.data-table tbody:has(tr:only-child .empty-state) {
+  background: transparent;
+}
+
+.data-table:has(tbody tr:only-child .empty-state) {
+  background: transparent;
+  box-shadow: none;
+}
+
+.data-table thead {
+  background: #4a4a4a;
+  color: #fff;
+}
+
+.data-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.data-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 13px;
+}
+
+.data-table tbody tr:hover { background: #f8f9fa; }
+
+/* Stati */
+.loading, .empty-state {
+  text-align: center;
+  padding: 24px;
+  color: #999;
+}
+
+.alert {
+  padding: 14px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.alert-error {
+  background: #fee2e2;
+  color: #7f1d1d;
+  border: 1px solid #fecaca;
+}
+
+/* Pannello gerarchia (se riutilizzato) */
+.gerarchia-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.gerarchia-panel span {
+  display: flex;
+  flex-direction: column;
+  color: #2c3e50;
+  font-size: 14px;
+}
+.gerarchia-panel label {
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #2c3e50;
+  font-size: 14px;
+}
+.gerarchia-panel input {
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  margin-top: 3px;
+  background: #fff;
+  color: #2c3e50;
+}
+.gerarchia-panel input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+/* Modali */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 720px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+  display: none; /* Rimuoviamo l'header separato */
+}
+
+.modal-header h3 {
+  display: none;
+}
+
+.close-btn {
+  display: none; /* Rimuoviamo il pulsante di chiusura visibile */
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 18px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.modal-body { 
+  padding: 0; /* Rimuoviamo padding aggiuntivo, il padding è già su modal-content */
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 0;
+  border-top: none;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  padding: 12px 16px;
+  border-radius: 6px;
+  color: #1f2d3d;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 2000;
+  animation: fadeIn 0.2s ease-out;
+}
+.toast-success { background: #e6ffed; border-left: 4px solid #28a745; }
+.toast-error { background: #ffecec; border-left: 4px solid #dc3545; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Searchable Select */
+.searchable-select-input {
+  position: relative;
+  width: 100%;
+  padding: 8px 28px 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #fff;
+  color: #2c3e50;
+  box-sizing: border-box;
+  overflow: hidden;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-height: 2.8em; /* Limita l'altezza a 2 righe */
+  line-height: 1.4;
+}
+
+/* Quando non è in focus e ha un valore selezionato, mostra ellipsis a 2 righe */
+.searchable-select-input:not(:focus) {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  white-space: normal;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Quando è in focus, permette la digitazione normale */
+.searchable-select-input:focus {
+  white-space: normal;
+  overflow: visible;
+  max-height: none;
+}
+
+.searchable-select-input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.searchable-select-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 4px;
+}
+
+/* Quando il dropdown usa position fixed, viene posizionato dal JavaScript */
+.searchable-select-dropdown-fixed {
+  position: fixed !important;
+}
+
+.searchable-select-option {
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #2c3e50;
+  transition: background-color 0.2s;
+}
+
+.searchable-select-option:hover {
+  background-color: #f8f9fa;
+}
+
+.searchable-select-option.selected {
+  background: #eef2ff;
+  font-weight: 600;
+}
+
+.searchable-select-option.disabled {
+  color: #999;
+  cursor: not-allowed;
+  font-style: italic;
+}
+
+.searchable-select-option.disabled:hover {
+  background-color: transparent;
+}
+
+.searchable-select-input.select-compact {
+  width: 100%;
+  padding: 8px 28px 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  min-height: 36px;
+}
+
+/* Scrollbar personalizzata per dropdown */
+.searchable-select-dropdown::-webkit-scrollbar {
+  width: 8px;
+}
+
+.searchable-select-dropdown::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.searchable-select-dropdown::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.searchable-select-dropdown::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Checkbox Labels - Stile migliorato e professionale */
+/* Usa specificità alta e !important per sovrascrivere tutti gli altri stili */
+label.checkbox-label,
+.checkbox-label,
+.form-group label.checkbox-label,
+.form-group .checkbox-label {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  cursor: pointer !important;
+  font-weight: normal !important;
+  user-select: none;
+  white-space: nowrap !important;
+  margin: 0 !important;
+  margin-bottom: 0 !important;
+  padding: 0 !important;
+  line-height: 1.5 !important;
+  width: auto !important;
+  max-width: none !important;
+}
+
+label.checkbox-label span,
+.checkbox-label span,
+.form-group label.checkbox-label span,
+.form-group .checkbox-label span {
+  font-size: 14px !important;
+  color: #2c3e50 !important;
+  white-space: nowrap !important;
+  line-height: 1.5 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline-block !important;
+}
+
+input.checkbox-large,
+.checkbox-large,
+input[type="checkbox"].checkbox-large,
+.form-group input.checkbox-large {
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  min-height: 18px !important;
+  max-width: 18px !important;
+  max-height: 18px !important;
+  cursor: pointer !important;
+  margin: 0 !important;
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+  padding: 0 !important;
+  flex-shrink: 0 !important;
+  accent-color: #007bff !important;
+  border-radius: 3px !important;
+  vertical-align: middle !important;
+  box-sizing: border-box !important;
+}
+
+input.checkbox-large:hover,
+.checkbox-large:hover,
+input[type="checkbox"].checkbox-large:hover {
+  accent-color: #0056b3 !important;
+}
+
+input.checkbox-large:focus,
+.checkbox-large:focus,
+input[type="checkbox"].checkbox-large:focus {
+  outline: none !important;
+  outline-offset: 0 !important;
+}
+
+/* Rimuovi outline da tutti i checkbox nelle modali */
+input[type="checkbox"]:focus,
+.form-group input[type="checkbox"]:focus,
+.modal-body input[type="checkbox"]:focus,
+.modal-content input[type="checkbox"]:focus {
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Media query ora gestita globalmente in App.css */

@@ -1,0 +1,63 @@
+.form-group .searchable-select-container {
+  width: 100%;
+}
+
+.form-group .searchable-select-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.form-group .searchable-select-input:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.gestione-attrezzature {
+  padding: 20px;
+}
+
+.header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.attrezzatura-details {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.details-section {
+  margin-bottom: 30px;
+}
+
+.details-section h4 {
+  margin-bottom: 15px;
+  color: #333;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 8px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.section-header h4 {
+  margin: 0;
+  border: none;
+  padding: 0;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 14px;
+}
+

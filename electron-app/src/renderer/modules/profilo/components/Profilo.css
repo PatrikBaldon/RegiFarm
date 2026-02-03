@@ -1,0 +1,271 @@
+.profilo-module {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+}
+
+.profilo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.profilo-header h2 {
+  margin: 0 0 8px;
+}
+
+.profilo-header p {
+  margin: 0;
+  color: #4a5568;
+}
+
+.profilo-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #edf2f7;
+  min-width: 220px;
+}
+
+.profilo-summary-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #2b6cb0;
+}
+
+.profilo-summary strong {
+  font-size: 16px;
+  color: #1a202c;
+}
+
+.profilo-summary-meta {
+  font-size: 13px;
+  color: #4a5568;
+}
+
+.profilo-alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.profilo-alert-info {
+  background: #ebf8ff;
+  color: #2c5282;
+  border: 1px solid #90cdf4;
+}
+
+.profilo-alert-error {
+  background: #fff5f5;
+  color: #c53030;
+  border: 1px solid #feb2b2;
+}
+
+.profilo-loading {
+  padding: 24px;
+  text-align: center;
+  color: #2d3748;
+  font-weight: 500;
+}
+
+.profilo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.profilo-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.06);
+  border: 1px solid #e2e8f0;
+}
+
+.profilo-card h3 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  color: #1a202c;
+}
+
+.profilo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px 20px;
+}
+
+.profilo-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profilo-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.profilo-field input,
+.profilo-field select {
+  border: 1px solid #cbd5f5;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.profilo-field input:focus,
+.profilo-field select:focus {
+  outline: none;
+  border-color: #3182ce;
+  box-shadow: 0 0 0 1px rgba(49, 130, 206, 0.3);
+}
+
+.profilocard-span-2 {
+  grid-column: span 2;
+}
+
+@media (max-width: 768px) {
+  .profilocard-span-2 {
+    grid-column: span 1;
+  }
+}
+
+.profilo-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.profilo-actions .btn-primary,
+.profilo-actions .btn-secondary {
+  min-width: 160px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.profilo-actions .btn-primary {
+  background: #3182ce;
+  color: #ffffff;
+}
+
+.profilo-actions .btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.profilo-actions .btn-secondary {
+  background: #e2e8f0;
+  color: #2d3748;
+}
+
+.profilo-help {
+  background: #f7fafc;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px dashed #cbd5e0;
+}
+
+.profilo-help h3 {
+  margin: 0 0 8px;
+  color: #2d3748;
+}
+
+.profilo-help p {
+  margin: 0;
+  color: #4a5568;
+}
+
+.profilo-logo-hint {
+  margin: 0 0 16px 0;
+  font-size: 13px;
+  color: #4a5568;
+}
+
+.profilo-logo-upload {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.profilo-logo-preview-wrapper {
+  width: 220px;
+  min-height: 140px;
+  border: 1px dashed #cbd5f5;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  padding: 12px;
+}
+
+.profilo-logo-preview {
+  max-width: 100%;
+  max-height: 160px;
+  object-fit: contain;
+}
+
+.profilo-logo-placeholder {
+  color: #94a3b8;
+  font-size: 14px;
+  text-align: center;
+}
+
+.profilo-logo-actions {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.profilo-logo-actions input[type='file'] {
+  border: 1px dashed #cbd5f5;
+  border-radius: 8px;
+  padding: 10px;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.profilo-logo-error {
+  color: #c53030;
+  font-size: 13px;
+  margin: 0;
+}
+
+.profilo-logo-note {
+  color: #4a5568;
+  font-size: 13px;
+  margin: 0;
+}
+
+.profilo-logo-buttons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.profilo-logo-remove {
+  background: none;
+  border: none;
+  color: #c53030;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.profilo-logo-remove:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+

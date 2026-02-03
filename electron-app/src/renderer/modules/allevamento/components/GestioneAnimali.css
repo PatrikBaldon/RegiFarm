@@ -1,0 +1,177 @@
+.gestione-animali {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  margin-top: -24px; /* Compensa il padding del modulo principale */
+  padding-top: 0;
+}
+
+.gestione-tabs {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 20px !important;
+  padding: 16px 0 0 0;
+  /* Rimossi border-bottom e stile tab principali - solo testo evidenziato */
+  /* Rimosso margin-bottom per eliminare lo spazio tra i tab e il contenuto */
+}
+
+/* Stili sovrascritti per rimuovere contorni azzurri/blu dagli stili globali */
+.gestione-tabs .tab-button {
+  padding: 12px 16px !important;
+  border: none !important;
+  background: none !important;
+  background-color: transparent !important;
+  font-size: 15px;
+  font-weight: 400;
+  color: #666 !important;
+  cursor: pointer;
+  transition: color 0.2s ease, font-weight 0.2s ease;
+  outline: none !important;
+  border-radius: 0 !important;
+  border-bottom: none !important;
+  height: auto !important;
+  min-height: auto !important;
+  box-shadow: none !important;
+  position: relative;
+}
+
+.gestione-tabs .tab-button:hover {
+  color: #2563eb !important;
+  font-weight: 600;
+  background: none !important;
+  background-color: transparent !important;
+}
+
+.gestione-tabs .tab-button.active {
+  color: #2563eb !important;
+  font-weight: 600;
+  background: none !important;
+  background-color: transparent !important;
+  border-bottom: none !important;
+}
+
+.gestione-content {
+  flex: 1;
+  /* Rimosso overflow-y per evitare doppie scrollbar - lo scroll è gestito dal main-content */
+  min-height: 0;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.piani-info-section {
+  margin-bottom: 24px;
+  padding: 20px;
+  /* Rimosso sfondo bianco per consistenza - mantenuto solo bordo sinistro per evidenziare */
+  border-left: 4px solid #2563eb;
+  padding-left: 24px;
+}
+
+.piani-info-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.piani-instructions {
+  margin: 0 0 16px 0;
+  padding-left: 24px;
+  color: #374151;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.piani-instructions li {
+  margin-bottom: 8px;
+}
+
+.piani-instructions strong {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.piani-note {
+  margin: 0;
+  padding: 12px 0;
+  /* Rimosso sfondo bianco per consistenza */
+  font-size: 14px;
+  color: #4b5563;
+  line-height: 1.6;
+  }
+
+.piani-note strong {
+  color: #1f2937;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 24px;
+}
+
+.modal-card {
+  width: min(640px, 100%);
+  max-height: 90vh;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.25);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  padding: 20px 24px 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #edf0f5;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #1f2933;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: #64748b;
+  padding: 4px;
+}
+
+.modal-body {
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.modal-footer {
+  padding: 16px 24px 24px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid #edf0f5;
+}
+
+.alert-success {
+  background: #e8f8ef;
+  border: 1px solid #34d399;
+  color: #047857;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 14px;
+}
+

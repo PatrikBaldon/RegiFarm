@@ -1,0 +1,57 @@
+.allevamento-hierarchy {
+  padding: 0;
+  height: 100%;
+  /* Rimosso overflow-y per evitare doppie scrollbar - lo scroll è gestito dal main-content */
+}
+
+.hierarchy-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.hierarchy-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 12px 0;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.breadcrumb-link {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  padding: 0;
+  font-size: 14px;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb-link:hover {
+  color: #0056b3;
+}
+
+.breadcrumb-current {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.breadcrumb-separator {
+  color: #999;
+  margin: 0 4px;
+}
+
+.hierarchy-content {
+  /* Rimossi sfondo bianco, border-radius, padding e box-shadow per consistenza con il resto dell'app */
+  min-height: 500px;
+}
+

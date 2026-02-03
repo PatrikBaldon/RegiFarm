@@ -1,0 +1,321 @@
+.registra-somministrazione-gruppo {
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+}
+
+.somministrazione-gruppo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Rimuove background, padding, border-radius e box-shadow quando il form è dentro BaseModal */
+.base-modal-body .somministrazione-gruppo-form {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Quando dentro BaseModal, usa gli stili di BaseModal.css */
+.base-modal-body .form-row {
+  /* BaseModal.css gestisce già form-row */
+}
+
+.base-modal-body .form-group {
+  /* BaseModal.css gestisce già form-group */
+}
+
+.base-modal-body .form-group label {
+  /* BaseModal.css gestisce già le label */
+}
+
+.base-modal-body .form-group input[type="text"],
+.base-modal-body .form-group input[type="number"],
+.base-modal-body .form-group input[type="datetime-local"],
+.base-modal-body .form-group textarea {
+  /* BaseModal.css gestisce già gli input */
+}
+
+/* Stili solo quando NON dentro BaseModal */
+.registra-somministrazione-gruppo .form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.registra-somministrazione-gruppo .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.registra-somministrazione-gruppo .form-group label {
+  font-weight: 500;
+  color: #333;
+  font-size: 0.9em;
+}
+
+.registra-somministrazione-gruppo .form-group input[type="text"],
+.registra-somministrazione-gruppo .form-group input[type="number"],
+.registra-somministrazione-gruppo .form-group input[type="datetime-local"],
+.registra-somministrazione-gruppo .form-group textarea {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.95em;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.readonly-input {
+  background: #f5f5f5;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.animali-selection-info {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #e8f4f8;
+  border-radius: 4px;
+  border-left: 4px solid #174c88;
+}
+
+.info-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95em;
+}
+
+.quota-info {
+  color: #174c88;
+  font-weight: 600;
+}
+
+.partite-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.partita-card {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 12px;
+  background: #fff;
+  transition: all 0.2s;
+}
+
+.partita-card.esclusa {
+  background: #f9f9f9;
+  opacity: 0.7;
+  border-color: #ccc;
+}
+
+.partita-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.partita-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  flex: 1;
+}
+
+.partita-title {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95em;
+}
+
+.partita-capi {
+  color: #666;
+  font-weight: normal;
+  font-size: 0.85em;
+  margin-left: 4px;
+}
+
+.partita-status {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+.partita-status.inclusa {
+  background: #d4edda;
+  color: #155724;
+}
+
+.partita-status.esclusa {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.animali-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+  padding-left: 24px;
+}
+
+.animale-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background: #f8f9fa;
+  transition: all 0.2s;
+}
+
+.animale-item.escluso {
+  background: #fff3cd;
+  opacity: 0.7;
+}
+
+.animale-item.reincluso {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+}
+
+.partita-esclusa-note {
+  padding: 8px;
+  background: #fff3cd;
+  border-radius: 4px;
+  font-size: 0.85em;
+  color: #856404;
+  margin-bottom: 8px;
+  font-style: italic;
+}
+
+.reincluso-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  background: #28a745;
+  color: white;
+  border-radius: 12px;
+  font-size: 0.75em;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.9em;
+  flex: 1;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.box-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  background: #e8f4f8;
+  color: #174c88;
+  border-radius: 12px;
+  font-size: 0.8em;
+  margin-left: 8px;
+}
+
+.btn-link-small {
+  background: none;
+  border: none;
+  color: #174c88;
+  cursor: pointer;
+  font-size: 0.85em;
+  text-decoration: underline;
+  padding: 4px 8px;
+}
+
+.btn-link-small:hover {
+  color: #0d3a6b;
+}
+
+.quota-preview {
+  margin-top: 6px;
+  padding: 8px;
+  background: #e8f4f8;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: #174c88;
+}
+
+/* I pulsanti devono essere nel footer della modale, non qui */
+/* Rimuoviamo form-actions quando dentro BaseModal */
+.base-modal-body .form-actions {
+  display: none;
+}
+
+/* Stili solo quando NON dentro BaseModal */
+.registra-somministrazione-gruppo .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.95em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: #174c88;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #0d3a6b;
+}
+
+.btn-primary:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+}
+
+
+.empty-state {
+  padding: 20px;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}
+

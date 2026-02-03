@@ -1,0 +1,12 @@
+/* Stili specifici del modulo - gli stili comuni sono in App.css */
+
+/* Stili rimossi - ora gestiti globalmente in App.css */
+
+.allevamento-content {
+  flex: 1;
+  /* Rimosso overflow-y per evitare doppie scrollbar - lo scroll è gestito dal main-content */
+  min-height: 0;
+}
+
+/* Media query ora gestita globalmente in App.css */
+

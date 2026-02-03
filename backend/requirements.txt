@@ -1,0 +1,43 @@
+# FastAPI and Server
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+
+# Database
+sqlalchemy==2.0.25
+alembic==1.13.1
+psycopg2-binary==2.9.9
+
+# Data Validation
+pydantic==2.12.4
+pydantic-settings==2.1.0
+
+# Authentication & Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.6
+
+# Utilities
+python-dateutil==2.8.2
+openpyxl==3.1.2
+# RIMOSSO: numpy e pandas usano ~300MB RAM all'avvio
+# Vengono installati dinamicamente solo quando necessario
+# numpy==1.26.3
+# pandas==2.1.4
+reportlab==4.0.7
+beautifulsoup4==4.12.2
+lxml==5.1.0  # Parser HTML per sincronizzazione anagrafe (molto più leggero di pandas)
+
+# Machine Learning - RIMOSSO per risparmiare memoria (~150-200MB)
+# scikit-learn era usato solo per funzionalità ML disabilitate
+# Se necessario in futuro, usare un worker separato o servizio esterno
+# scikit-learn==1.4.0
+
+# Supabase SDK and dependencies (backend/app/services/supabase_client.py)
+supabase==2.24.0
+gotrue==2.12.4
+postgrest==2.24.0
+storage3==2.24.0
+realtime==2.24.0
+httpx==0.28.1
+pyjwt==2.10.1
+

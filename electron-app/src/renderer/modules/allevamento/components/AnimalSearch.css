@@ -1,0 +1,578 @@
+.animal-search {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: calc(100vh - 220px); /* Ridotto ulteriormente per eliminare scrolling */
+  max-height: calc(100vh - 220px);
+  overflow: hidden;
+}
+
+.search-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  /* Altezza fissa per prevenire salti */
+  min-height: 60px;
+  /* Previene reflow */
+  contain: layout;
+}
+
+.search-header h2 {
+  font-size: 26px;
+  font-weight: 600;
+  color: #1f2933;
+  margin: 0 0 4px 0;
+}
+
+.search-subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: #506176;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.animal-search-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 320px) 1fr;
+  gap: 16px;
+  align-items: stretch;
+  /* Previene salti di layout durante il caricamento */
+  min-height: 0;
+  /* Isola il layout per evitare che cambiamenti nel contenuto spostino il pannello filtri */
+  contain: layout style;
+  /* Altezza fissa per evitare scrolling verticale */
+  flex: 1;
+  overflow: hidden;
+  max-height: calc(100% - 60px); /* Lascia spazio per il footer fisso (bottom: 8px + ~52px altezza) */
+}
+
+@media (max-width: 1100px) {
+  .animal-search-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.filters-panel {
+  position: relative;
+  height: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  align-self: stretch;
+  min-height: 0;
+}
+
+.filters-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  /* Sfondo bianco e bordi per rendere la sezione ben visibile e separata */
+  height: 100%;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  /* Scrolling interno per i filtri */
+}
+
+.filters-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.filter-divider {
+  height: 1px;
+  background: #e0e0e0;
+  margin: 8px 0;
+  /* Spaziatura ridotta per ottimizzare lo spazio */
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: #364152;
+  /* Spaziatura migliorata per contenere meglio gli elementi */
+}
+
+.filter-field span {
+  font-weight: 500;
+  color: #475467;
+}
+
+.filter-field input,
+.filter-field select,
+.filter-field textarea {
+  padding: 8px 10px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1f2933;
+  background: #fff;
+  transition: border-color 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+  /* Elementi ben contenuti nello spazio */
+}
+
+.filter-field input:focus,
+.filter-field select:focus {
+  border-color: #3b82f6;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.filter-field .searchable-select-container {
+  width: 100%;
+}
+
+.filters-hint {
+  font-size: 12px;
+  color: #667085;
+  margin: 0;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  /* Gap aumentato per contenere meglio gli elementi affiancati */
+}
+
+@media (max-width: 600px) {
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.filter-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  color: #364152;
+  /* Spaziatura ridotta tra checkbox */
+}
+
+.filter-checkboxes label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.filter-checkboxes input {
+  width: 18px;
+  height: 18px;
+}
+
+.pill-input {
+  padding: 8px 12px;
+  background: #f5f7fa;
+  border-radius: 8px;
+  border: 1px solid #e5ebf1;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #1f2933;
+}
+
+.filter-toggle {
+  border: none;
+  background: none;
+  color: #2563eb;
+  font-size: 14px;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.filter-toggle:hover {
+  color: #1d4ed8;
+}
+
+.filter-actions-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+  /* Spaziatura ridotta per i pulsanti */
+}
+
+.filter-actions-vertical .btn-primary,
+.filter-actions-vertical .btn-secondary {
+  width: 100%;
+}
+
+.results-panel {
+  /* Rimossi sfondo bianco, border, border-radius e box-shadow per consistenza con il resto dell'app */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 0;
+  /* Previene reflow quando la tabella viene renderizzata */
+  contain: layout;
+  overflow: hidden;
+}
+
+.selection-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #d9e0ea;
+  border-radius: 10px;
+  background: #f8fafc;
+  font-size: 14px;
+  color: #334155;
+  margin-bottom: 8px;
+}
+
+.selection-toolbar-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  /* Altezza minima per prevenire salti quando il timestamp appare */
+  min-height: 60px;
+  /* Previene reflow quando il contenuto cambia */
+  contain: layout;
+}
+
+/* Rimosso .results-summary h3 - titolo "Risultati" rimosso per evitare duplicazioni */
+
+.results-summary {
+  /* Altezza minima per prevenire salti quando il timestamp appare */
+  min-height: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  /* Larghezza minima per stabilizzare l'ampiezza del testo e prevenire salti */
+  min-width: 300px;
+  flex: 1;
+}
+
+.results-summary p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #475467;
+  /* Stabilizza l'ampiezza per evitare salti quando cambia il contenuto */
+  width: 100%;
+  /* Permette il wrap ma mantiene una larghezza stabile */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.results-timestamp {
+  font-size: 12px;
+  color: #98a2b3;
+  /* Pre-alloca lo spazio anche quando non visibile per evitare salti */
+  min-height: 18px;
+  display: block;
+  visibility: hidden;
+}
+
+.results-timestamp:not(:empty) {
+  visibility: visible;
+  margin-top: 4px;
+}
+
+.results-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-tertiary {
+  background: none;
+  border: none;
+  color: #4f46e5;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.btn-tertiary:hover {
+  background: rgba(79, 70, 229, 0.1);
+}
+
+.btn-icon {
+  background: #f1f5f9;
+  color: #1f2933;
+  border: 1px solid #e2e8f0;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-icon:hover:not(:disabled) {
+  background: #e2e8f0;
+  border-color: #cbd5f5;
+}
+
+.btn-icon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* .results-table-wrapper rimosso - ora si usa .table-container da Alimentazione.css */
+
+/* Override per table-container in AnimalSearch - nessuna altezza minima per evitare estensioni oltre i record */
+.animal-search .table-container {
+  /* Rimossa min-height per evitare che la tabella si estenda oltre i record quando ce ne sono pochi */
+  contain: layout;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: auto;
+  min-height: 0;
+  max-height: calc(15 * 38px + 50px); /* 15 righe * ~38px + header ~42px */
+  padding-bottom: 0;
+  margin-bottom: 0;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+/* Rimuove spazio extra dopo l'ultima riga della tabella */
+.animal-search .data-table tbody {
+  display: table-row-group;
+}
+
+.animal-search .data-table tbody tr:last-child td {
+  border-bottom: none;
+  padding-bottom: 8px;
+}
+
+.animal-search .data-table tbody tr td {
+  padding: 8px 12px; /* Padding bilanciato per 15 record senza scrolling */
+}
+
+.animal-search .data-table thead th {
+  padding: 14px 14px; /* Padding header aumentato */
+}
+
+/* Assicura che la tabella non aggiunga spazio extra oltre l'ultimo record */
+.animal-search .data-table {
+  display: table;
+  table-layout: auto;
+  height: auto; /* Forza l'altezza automatica */
+  max-height: none; /* Rimuove eventuali max-height */
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-spacing: 0;
+}
+
+
+/* Assicura che non ci sia spazio dopo il tbody */
+.animal-search .data-table tbody::after {
+  content: none;
+  display: none;
+}
+
+/* Rimuove lo sfondo bianco della tabella quando il tbody è vuoto o ha solo righe vuote */
+.animal-search .data-table:has(tbody:empty),
+.animal-search .data-table tbody:empty ~ * {
+  background: transparent;
+}
+
+.animal-search .data-table tbody:empty + tfoot,
+.animal-search .data-table:has(tbody:empty) {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Rimuove lo sfondo bianco quando non ci sono righe effettive nel tbody */
+.animal-search .data-table tbody:has(tr:only-child td.empty-state) {
+  background: transparent;
+}
+
+.animal-search .table-container:has(.data-table tbody:has(tr:only-child td.empty-state)) {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+/* Sezione paginazione fissa in basso */
+.animal-search .pagination-fixed-bottom {
+  position: fixed;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  pointer-events: none;
+  z-index: 100;
+  width: 100%;
+}
+
+.animal-search .pagination-fixed-bottom .pagination {
+  pointer-events: auto;
+  background: transparent;
+}
+
+/* Stili specifici per la tabella animali che estendono data-table */
+.data-table {
+  min-width: 720px;
+}
+
+.data-table th.selection-col,
+.data-table td.selection-col {
+  width: 42px;
+  text-align: center;
+}
+
+.data-table tbody tr {
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.data-table tbody tr.selected-row {
+  background: #eef4ff;
+}
+
+.data-table tbody tr.selected-row:hover {
+  background: #e1ecff;
+}
+
+.data-table tbody tr.row-active {
+  background: #eef2ff;
+  box-shadow: inset 3px 0 0 #4f46e5;
+}
+
+.data-table tbody tr.row-active:hover {
+  background: #e4ebff;
+}
+
+.data-table tbody tr.row-loading {
+  position: relative;
+}
+
+.data-table tbody tr.row-loading::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  margin-top: -6px;
+  border: 2px solid #4f46e5;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: animal-row-spin 0.8s linear infinite;
+}
+
+@keyframes animal-row-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cell-strong {
+  font-weight: 600;
+  color: #1f2933;
+}
+
+/* Status pill nella tabella - dimensioni uniformi definite in App.css */
+.status-pill.presente {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-pill.venduto,
+.status-pill.macellato,
+.status-pill.trasferito {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.results-empty {
+  text-align: center;
+  padding: 48px 16px;
+  color: #64748b;
+  /* Pre-alloca lo spazio per evitare salti quando la tabella appare */
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Rimosso .results-empty h4 - titolo "Nessun animale trovato" rimosso per evitare duplicazioni con il messaggio nel results-summary */
+
+.results-loading {
+  padding: 36px 16px;
+  text-align: center;
+  color: #475467;
+  /* Pre-alloca lo spazio per evitare salti quando la tabella appare */
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.alert {
+  padding: 14px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.alert-error {
+  background: #fee2e2;
+  color: #7f1d1d;
+  border: 1px solid #fecaca;
+}
+
+/* Sezione paginazione fissa in basso */
+.animal-search .pagination-fixed-bottom {
+  position: fixed;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  pointer-events: none;
+  z-index: 100;
+  width: 100%;
+}
+
+.animal-search .pagination-fixed-bottom .pagination {
+  pointer-events: auto;
+  background: transparent;
+}
+

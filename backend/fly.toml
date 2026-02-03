@@ -1,0 +1,59 @@
+# fly.toml per RegiFarm Backend
+# Configurazione per fly.io
+
+app = "regifarm-backend"
+primary_region = "fra"  # Frankfurt, Germania - più vicina all'Italia per latenza e costi
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PYTHONUNBUFFERED = "1"
+  PYTHONDONTWRITEBYTECODE = "1"
+  PORT = "8000"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0  # Scale to zero: si spegne senza traffico, si avvia alla prima chiamata (cold start ~10-30s)
+  processes = ["app"]
+
+  # Limite connessioni: il frontend apre molte richieste in parallelo (login, sync, statistiche, ecc.)
+  # Con 3 conn si superava il limite e Fly restituiva ERR_CONNECTION_RESET
+  [http_service.concurrency]
+    type = "connections"
+    soft_limit = 10   # Dopo 10 conn, Fly avvia altra macchina
+    hard_limit = 20  # Max 20 conn per macchina (burst iniziale ~15 richieste)
+
+  [[http_service.checks]]
+    grace_period = "45s"
+    interval = "15s"
+    method = "GET"
+    timeout = "15s"
+    path = "/health"
+
+[processes]
+  # Ottimizzato per free tier (512MB): 1 worker, timeout ridotto
+  # Lo script start.sh gestisce PORT automaticamente
+  app = "/app/start.sh"
+
+# Configurazione risorse: 4096MB per gestire file anagrafe grandi
+# - FastAPI + SQLAlchemy + modelli: ~400MB base
+# - Pandas + NumPy (caricati on-demand): ~150MB
+# - Elaborazione file .gz grandi: può richiedere 1-2GB per file ~1MB compressi
+# - Buffer per garbage collection: ~500MB
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 2048
+
+# Nota: Le variabili d'ambiente sensibili (DATABASE_URL, SECRET_KEY, etc.)
+# devono essere impostate tramite:
+# fly secrets set DATABASE_URL="your-database-url"
+# fly secrets set SECRET_KEY="your-secret-key"
+# fly secrets set SUPABASE_URL="your-supabase-url"
+# fly secrets set SUPABASE_ANON_KEY="your-anon-key"
+# fly secrets set SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
+

@@ -1,0 +1,109 @@
+# OS Specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Node modules
+node_modules/
+
+# Dependencies
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Build outputs
+build/
+dist/
+*.exe
+*.dmg
+*.AppImage
+*.deb
+*.rpm
+*.tar.gz
+*.zip
+electron-app/output/
+
+# IDE
+.vscode/
+.idea/
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+# Database dumps and local SQL files (but allow migration scripts)
+*.dump.sql
+*.backup.sql
+# Allow SQL migration scripts in migrations directories
+!backend/database/migrations/*.sql
+!database/migrations/*.sql
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Licenses (sensibili)
+licenses/*.key
+licenses/*.activation
+licenses/registry.json
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Electron
+out/
+app-build/
+.electron-builder/
+
+# Python
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# Testing
+test-results/
+coverage/
+
+# Backend
+backend/__pycache__/
+backend/.pytest_cache/
+backend/*.pyc
+backend/*.pyo
+
+# Frontend
+electron-app/src/renderer/*.js.map
+*.map
+
+# Package manager locks (optional - keep if you want reproducible builds)
+# package-lock.json
+# yarn.lock
+

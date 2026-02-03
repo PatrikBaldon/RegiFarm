@@ -1,0 +1,201 @@
+.cicli-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 12px;
+  /* Allineato allo stile entity-grid di Allevamento */
+}
+
+.ciclo-card {
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  /* Allineato allo stile entity-card di Allevamento */
+}
+
+.ciclo-card:hover {
+  border-color: #007bff;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.ciclo-card.active {
+  border-color: #007bff;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.25);
+  /* Mantenuto stile hover ma più marcato per stato active */
+}
+
+.ciclo-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e0e0e0;
+  /* Allineato allo stile entity-card-header di Allevamento */
+}
+
+.ciclo-card__title {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.ciclo-card__title h4 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+  /* Allineato allo stile entity-card-header h3 di Allevamento */
+}
+
+.ciclo-card__title-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ciclo-card__badge {
+  font-size: 12px;
+  color: #666;
+  background: #f8f9fa;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 500;
+  /* Allineato allo stile entity-badge di Allevamento */
+}
+
+.ciclo-card__dates {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+  /* Stesso stile del badge per coerenza */
+}
+
+.ciclo-card__actions {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  /* Allineato allo stile entity-actions di Allevamento */
+}
+
+.ciclo-card__body {
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  /* Allineato allo stile entity-card-body di Allevamento */
+}
+
+.ciclo-card__body p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.ciclo-card__body strong {
+  color: #2c3e50;
+}
+
+.ciclo-card__fasi-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 8px;
+}
+
+.ciclo-card__fasi-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.ciclo-card__fasi-info span {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.ciclo-card__fasi-info strong {
+  font-size: 14px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.btn-small {
+  padding: 4px 12px;
+  font-size: 12px;
+  min-height: auto;
+}
+
+.ciclo-card__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.ciclo-card__stat {
+  padding: 8px 0;
+  /* Rimossi background, border e border-radius colorati - solo struttura pulita */
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ciclo-card__stat span {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+  /* Allineato con entity-card-body p */
+}
+
+.ciclo-card__stat strong {
+  font-size: 0.98rem;
+  color: #2c3e50;
+  font-weight: 600;
+  /* Allineato con entity-card-body strong */
+}
+
+@media (max-width: 900px) {
+  .ciclo-card__stats {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .ciclo-card__stats {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+
+  .ciclo-card__fasi-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .ciclo-card__fasi-info {
+    width: 100%;
+  }
+}
+
+/* Stili per righe tabella fasi cliccabili */
+.table-container .data-table tbody tr[style*="cursor: pointer"] {
+  transition: background-color 0.2s ease;
+}
+
+.table-container .data-table tbody tr[style*="cursor: pointer"]:hover {
+  background-color: #f0f7ff;
+}
+

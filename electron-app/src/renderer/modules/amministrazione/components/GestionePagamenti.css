@@ -1,0 +1,41 @@
+.gestione-pagamenti {
+  padding: 20px;
+}
+
+.filters-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.filters-bar input,
+.filters-bar .searchable-select-input {
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.filters-bar .searchable-select-container {
+  min-width: 180px;
+}
+
+.form-group .searchable-select-container {
+  width: 100%;
+}
+
+.form-group .searchable-select-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.form-group .searchable-select-input:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+

@@ -1,0 +1,85 @@
+/* Stili per PartiteAnagrafeModal - usa BaseModal quindi stili minimi */
+
+/* Header con label tipo + data e capi affiancati */
+.partite-anagrafe-modal .partita-header-badge {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.partite-anagrafe-modal .partita-header-meta {
+  font-size: 14px;
+  color: #374151;
+  font-weight: 600;
+}
+.partite-anagrafe-modal .partita-header-meta-label {
+  font-weight: 500;
+  color: #6b7280;
+  margin-right: 2px;
+}
+.partite-anagrafe-modal .partita-header-meta strong {
+  color: #111827;
+}
+
+/* Operazioni rimanenti: solo il numero, senza barra di completamento */
+.partite-anagrafe-rimanenti {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 15px;
+}
+.partite-anagrafe-rimanenti-label {
+  color: #4b5563;
+}
+.partite-anagrafe-rimanenti-numero {
+  color: #1f2937;
+  font-size: 18px;
+}
+
+/* Form partite: campi piccoli affiancati in griglia */
+.partite-anagrafe-modal .partita-form-section {
+  display: grid;
+  gap: 10px 20px;
+  align-items: start;
+}
+.partite-anagrafe-modal .partita-form-section--partita {
+  grid-template-columns: repeat(2, minmax(140px, 1fr));
+}
+.partite-anagrafe-modal .partita-form-section--decessi {
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+}
+.partite-anagrafe-modal .partita-form-section .form-group {
+  min-width: 0;
+}
+.partite-anagrafe-modal .partita-form-section .form-group--full {
+  grid-column: 1 / -1;
+}
+.partite-anagrafe-modal .partita-form-section .form-group label {
+  font-size: 13px;
+  display: block;
+  margin-bottom: 4px;
+}
+.partite-anagrafe-modal .partita-form-section .form-group input[type="number"],
+.partite-anagrafe-modal .partita-form-section .form-group input[type="text"] {
+  width: 100%;
+  max-width: 160px;
+  padding: 6px 10px;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+.partite-anagrafe-modal .partita-form-section .form-group small {
+  font-size: 11px;
+  margin-top: 2px;
+}
+.partite-anagrafe-modal .partita-form-section .capi-list,
+.partite-anagrafe-modal .partita-form-section .capi-decessi-section {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+.partite-anagrafe-modal .partita-form-section textarea {
+  max-width: 100%;
+  min-height: 60px;
+  padding: 6px 10px;
+  font-size: 13px;
+  box-sizing: border-box;
+}

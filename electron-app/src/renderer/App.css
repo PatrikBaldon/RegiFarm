@@ -1,0 +1,768 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #f5f5f5;
+  color: #1a1a1a;
+}
+
+#root {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.intro-video-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.intro-video-layer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.intro-video-layer__video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: none;
+  filter: none;
+  transition: none;
+  pointer-events: none;
+}
+
+.intro-video-layer--frozen .intro-video-layer__video {
+  filter: none;
+}
+
+.intro-video-actions {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  display: flex;
+  gap: 12px;
+  z-index: 3000;
+}
+
+.app-intro-skip {
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 10px 20px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.app-intro-skip:hover {
+  background: rgba(0, 0, 0, 0.8);
+  transform: translateY(-2px);
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #f5f5f5;
+}
+
+.app-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #f5f5f5;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 0; /* Permette al flex item di restringersi correttamente */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.main-content:not(.sidebar-open) {
+  margin-left: -200px; /* Solo pulsante 40px + 10px di spazio - contenuto si espande a sinistra */
+}
+
+.main-content.sidebar-open {
+  margin-left: 50px; /* Sidebar 240px + Pulsante 40px - contenuto si restringe */
+}
+
+@media (min-width: 769px) {
+  .sidebar {
+    position: relative !important;
+    top: 0 !important;
+    box-shadow: none;
+  }
+  
+  .sidebar:not(.open) {
+    transform: translateX(-240px);
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .sidebar-overlay {
+    display: none !important;
+  }
+}
+
+.module-placeholder {
+  padding: 40px;
+  text-align: center;
+  color: #999;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+/* Scrollbar Styling */
+.main-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.main-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.main-content::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.main-content::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* ============================================
+   STILI GLOBALI PULSANTI E TAB
+   Altezza uniforme e bordi molto arrotondati
+   ============================================ */
+
+/* Stili base per tutti i pulsanti */
+/* NOTA: .menu-button, .sidebar-toggle, .nav-item e .toggle-button sono esclusi per mantenere il design originale della linguetta, l'allineamento a sinistra della sidebar e le dimensioni personalizzate dei toggle */
+button:not(.menu-button):not(.sidebar-toggle):not(.nav-item):not(.toggle-button),
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+.btn-link,
+.btn-icon,
+.btn-close,
+.btn-small,
+.btn-move,
+.close-button,
+.close-btn,
+.header-button,
+.quick-action-button {
+  height: 36px;
+  min-height: 36px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+/* Padding standard per pulsanti normali */
+button:not(.btn-icon):not(.btn-close):not(.close-button):not(.close-btn):not(.btn-small),
+.btn:not(.btn-icon):not(.btn-small),
+.btn-primary:not(.btn-icon):not(.btn-small),
+.btn-secondary:not(.btn-icon):not(.btn-small),
+.btn-danger:not(.btn-icon):not(.btn-small),
+.quick-action-button {
+  padding: 0 16px;
+}
+
+/* Pulsanti icona piccoli (mantengono dimensioni più piccole ma stondati) */
+.btn-icon,
+.btn-close,
+.close-button,
+.close-btn {
+  width: auto;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 6px;
+}
+
+/* Pulsanti small (mantengono dimensioni ridotte ma stondati) */
+.btn-small {
+  height: 32px;
+  min-height: 32px;
+  border-radius: 6px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+/* Stili per tab buttons */
+.tab-button:not(.menu-button) {
+  height: 36px;
+  min-height: 36px;
+  padding: 0 16px;
+  border-radius: 6px 6px 0 0;
+  font-size: 14px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+/* Colori per pulsanti (mantenuti ma con nuovi border-radius) */
+.btn-primary {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #1d4ed8;
+}
+
+.btn-primary:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: #6b7280;
+  color: white;
+  border: none;
+}
+
+.btn-secondary:hover {
+  background-color: #4b5563;
+}
+
+.btn-danger {
+  background-color: #dc2626;
+  color: white;
+  border: none;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #b91c1c;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: #007bff;
+  text-decoration: underline;
+}
+
+.btn-link:hover {
+  background: none;
+  color: #0056b3;
+}
+
+/* Override per tab button active */
+.tab-button.active {
+  font-weight: 600;
+}
+
+/* Media query per mobile - mantiene bordi arrotondati */
+@media (max-width: 700px) {
+  .tab-button {
+    border-radius: 6px;
+    margin-bottom: 4px;
+  }
+}
+
+/* ============================================
+   STILI COMUNI PER TUTTI I MODULI
+   Struttura coerente con poche divisioni
+   ============================================ */
+
+/* Container comune per tutti i moduli */
+[class$="-module"] {
+  padding: 24px;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  font-size: 14px;
+  background: none;
+}
+
+/* Header comune - senza linee divisorie, titolo in maiuscolo */
+[class$="-header"] {
+  margin-bottom: 20px;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+[class$="-header"] h2 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Tabs comuni - senza linee divisorie */
+[class$="-tabs"] {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+/* Tab buttons - stile uniforme senza linee */
+.tab-button {
+  border: none;
+  background: transparent;
+  color: #666;
+  cursor: pointer;
+  border-bottom: none !important;
+  position: relative;
+  top: 0;
+  height: 44px;
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 22px;
+  font-size: 14px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.tab-button:hover {
+  color: #2c3e50;
+  background: #f8f9fa;
+}
+
+.tab-button.active {
+  color: #007bff;
+  background: #e7f3ff;
+  font-weight: 600;
+  border-bottom: none !important;
+}
+
+/* Content area comune */
+[class$="-content"] {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Rimuovi linee divisorie da sottosezioni */
+.section-header,
+.block-header {
+  border-bottom: none !important;
+  padding-bottom: 0 !important;
+}
+
+.section-header h3,
+.block-header h4 {
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+  color: #2c3e50;
+  margin-bottom: 16px;
+}
+
+/* Media query per mobile */
+@media (max-width: 700px) {
+  [class$="-module"] {
+    padding: 16px;
+  }
+  
+  [class$="-tabs"] {
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  
+  .tab-button {
+    border-radius: 22px;
+    border-left: none !important;
+    text-align: left;
+    padding: 8px 16px;
+    justify-content: flex-start;
+  }
+  
+  .tab-button.active {
+    border-left: none !important;
+    background: #e7f3ff !important;
+  }
+}
+
+/* ============================================
+   STILE UNIFICATO PAGINAZIONE
+   Riutilizzabile in tutti i moduli
+   ============================================ */
+
+/* Container principale paginazione */
+.pagination,
+.pagination-container,
+.table-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px 0;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  width: 100%;
+}
+
+/* Variante minimal - senza background e bordi */
+.pagination-minimal {
+  background: transparent;
+  border: none;
+  padding: 8px 0;
+  margin-top: 12px;
+  width: 100%;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Info paginazione (es. "1-20 di 100") */
+.pagination-info {
+  font-size: 12px;
+  color: #9ca3af;
+  font-weight: 400;
+  margin-right: 12px;
+}
+
+/* Controlli paginazione (contenitore pulsanti) */
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  width: auto;
+  min-width: fit-content;
+}
+
+/* Paginazione con larghezza fissa - sempre stesso numero di elementi */
+.pagination-minimal .pagination-controls {
+  width: 296px;
+  min-width: 296px;
+  max-width: 296px;
+  justify-content: space-between;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+}
+
+/* Container centrale con larghezza fissa per i numeri */
+.pagination-minimal .pagination-controls-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 216px;
+  min-width: 216px;
+  max-width: 216px;
+  flex-shrink: 0;
+}
+
+/* Assicura che i pulsanti prev/next non si restringano */
+.pagination-minimal .pagination-btn-prev,
+.pagination-minimal .pagination-btn-next {
+  flex-shrink: 0;
+  flex-grow: 0;
+}
+
+/* Info pagina corrente (es. "Pagina 1 di 5") */
+.pagination-page-info {
+  font-size: 13px;
+  color: #374151;
+  font-weight: 500;
+  padding: 0 8px;
+  white-space: nowrap;
+}
+
+/* Container per pulsanti pagina numerati */
+.pagination-pages {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Pulsante pagina numerata */
+.pagination-btn {
+  width: 32px;
+  min-width: 32px;
+  max-width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  color: #6b7280;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.pagination-btn:hover:not(:disabled):not(.active) {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.pagination-btn.active {
+  background-color: #e5e7eb;
+  color: #111827;
+  font-weight: 500;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Pulsanti prev/next */
+.pagination-btn-prev,
+.pagination-btn-next {
+  width: 32px;
+  min-width: 32px;
+  max-width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  color: #6b7280;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.pagination-btn-prev:hover:not(:disabled),
+.pagination-btn-next:hover:not(:disabled) {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.pagination-btn-prev:disabled,
+.pagination-btn-next:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Ellissi per pagine multiple */
+.pagination-ellipsis {
+  width: 20px;
+  min-width: 20px;
+  max-width: 20px;
+  padding: 0;
+  color: #9ca3af;
+  font-size: 13px;
+  font-weight: 400;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+/* Selettore items per pagina */
+.pagination-items-per-page {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.pagination-items-per-page label {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.pagination-items-per-page select,
+.items-per-page-select {
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  background-color: #ffffff;
+  color: #111827;
+  cursor: pointer;
+  min-width: 70px;
+  height: 36px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pagination-items-per-page select:focus,
+.items-per-page-select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Variante compatta per paginazione inline */
+.pagination-compact {
+  padding: 8px 12px;
+  gap: 12px;
+}
+
+.pagination-compact .pagination-btn,
+.pagination-compact .pagination-btn-prev,
+.pagination-compact .pagination-btn-next {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+/* Variante senza bordo (per integrazione in tabelle) */
+.pagination-no-border {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  border-radius: 0 0 8px 8px;
+  background-color: #ffffff;
+}
+
+/* Media query per mobile */
+@media (max-width: 768px) {
+  .pagination,
+  .pagination-container,
+  .table-pagination {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .pagination-controls {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .pagination-items-per-page {
+    margin-left: 0;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .pagination-info {
+    text-align: center;
+    width: 100%;
+  }
+}
+
+/* ============================================
+   STILE UNIFICATO ETICHETTE COLORATE NELLE TABELLE
+   Dimensioni uniformi basate su GestioneFornitori
+   ============================================ */
+
+/* Stile base per tutte le etichette colorate nelle tabelle */
+.data-table .badge,
+.data-table .badge-success,
+.data-table .badge-info,
+.data-table .badge-warning,
+.data-table .badge-danger,
+.data-table .badge-secondary,
+.data-table .badge-fornitore,
+.data-table .badge-cliente,
+.data-table .badge-macrocategoria,
+.data-table .fattura-badge,
+.data-table .badge-fattura-emessa,
+.data-table .badge-fattura-ricevuta,
+.data-table .badge-nota-credito,
+.data-table .badge-nota-debito,
+.data-table .badge-acconto,
+.data-table .badge-parcella,
+.data-table .badge-autofattura,
+.data-table .conto-badge,
+.data-table .account-badge,
+.data-table .categoria-badge,
+.data-table .categoria-badge-active,
+.data-table .fattura-type-badge,
+.data-table .status-badge,
+.data-table .status-pill,
+.table .badge,
+.table .badge-success,
+.table .badge-info,
+.table .badge-warning,
+.table .badge-danger,
+.table .badge-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  line-height: 1;
+  height: 20px;
+  box-sizing: border-box;
+}
+
+/* ============================================
+   PAGINAZIONE FISSA NEL FOOTER
+   Assicura che sia sempre posizionata rispetto al viewport
+   ============================================ */
+.pagination-fixed-bottom {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 10000 !important;
+  width: 100vw !important;
+  max-width: 100vw !important;
+  transform: none !important;
+  will-change: auto !important;
+  contain: none !important;
+  isolation: auto !important;
+}
+
+/* Nasconde la paginazione quando una modale è aperta (tutti i moduli: sanitario, alimentazione, terreni, attrezzatura, amministrazione, ecc.) */
+body:has(.base-modal-overlay) .pagination-fixed-bottom {
+  visibility: hidden !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+

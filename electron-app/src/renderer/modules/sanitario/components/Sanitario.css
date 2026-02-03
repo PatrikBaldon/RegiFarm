@@ -1,0 +1,14 @@
+.sanitario-module {
+  padding: 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Stili rimossi - ora gestiti globalmente in App.css */
+
+.sanitario-content {
+  flex: 1;
+  overflow-y: auto;
+}
+

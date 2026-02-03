@@ -1,0 +1,536 @@
+.gestione-fornitori {
+  padding: 4px 12px 0 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Wrapper tabella */
+.gestione-fornitori .table-wrapper {
+  margin-top: 10px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Limita altezza tabella per evitare scrolling verticale */
+.gestione-fornitori .table-container {
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: auto;
+  position: relative;
+  display: block;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 0;
+  align-self: flex-start;
+  width: 100%;
+}
+
+.gestione-fornitori .table-container table {
+  width: 100%;
+  border-collapse: collapse;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  display: table;
+  margin: 0;
+  padding: 0;
+  table-layout: auto;
+}
+
+.gestione-fornitori .data-table {
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  display: table;
+}
+
+.gestione-fornitori .data-table tbody {
+  display: table-row-group;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.gestione-fornitori .data-table tbody tr:last-child td {
+  border-bottom: none;
+  padding-bottom: 5px;
+}
+
+/* Rimuove spazio extra dopo l'ultima riga */
+.gestione-fornitori .data-table tbody::after {
+  content: none ;
+  display: none ;
+  height: 0 ;
+  margin: 0 ;
+  padding: 0 ;
+  line-height: 0 ;
+}
+
+.gestione-fornitori .data-table::after {
+  content: none;
+  display: none;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  line-height: 0;
+}
+
+.gestione-fornitori .table-container::after {
+  content: none;
+  display: none;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  line-height: 0;
+}
+
+/* Sezione paginazione fissa in basso */
+.gestione-fornitori .pagination-fixed-bottom {
+  position: fixed;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  pointer-events: none;
+  z-index: 100;
+  width: 100%;
+}
+
+.gestione-fornitori.modal-open .pagination-fixed-bottom {
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.gestione-fornitori .pagination-fixed-bottom .pagination {
+  pointer-events: auto;
+  background: transparent;
+}
+
+.gestione-fornitori > .filters-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+/* Filtri trasparenti */
+.gestione-fornitori .filters-bar {
+  background-color: transparent;
+  border: none;
+}
+
+/* Riepilogo risultati e paginazione sopra tabella */
+.gestione-fornitori .table-header-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.gestione-fornitori .table-results-info {
+  font-weight: 500;
+}
+
+.gestione-fornitori .table-pagination-info {
+  font-weight: 500;
+}
+
+/* Badge nella tabella - stile discreto e professionale */
+.gestione-fornitori .tipo-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Badge nella tabella - dimensioni uniformi definite in App.css */
+.gestione-fornitori .badge-fornitore {
+  background-color: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+}
+
+.gestione-fornitori .badge-cliente {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+}
+
+/* Badge categoria nella tabella - stile discreto */
+.categoria-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.categoria-badge-active {
+  background-color: #ede9fe;
+  color: #6d28d9;
+  border: 1px solid #c4b5fd;
+}
+
+.categoria-badge-empty {
+  color: #9ca3af;
+  background: transparent;
+  border: 1px solid #e5e7eb;
+}
+
+/* Stili specifici - gli stili base della tabella sono in Alimentazione.css */
+.gestione-fornitori .data-table {
+  border-spacing: 0;
+  border-collapse: collapse;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+}
+
+.gestione-fornitori .data-table th {
+  padding: 5px 6px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.gestione-fornitori .data-table td {
+  padding: 10px 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 0;
+}
+
+/* Nome troncato con ellipsis */
+.gestione-fornitori .data-table td:first-child {
+  max-width: 200px;
+}
+
+/* Contatti: permette wrapping su più righe ma tronca email lunghe */
+.gestione-fornitori .data-table td:nth-child(5) {
+  white-space: normal;
+  overflow: hidden;
+}
+
+.gestione-fornitori .data-table td:nth-child(5) > div > span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* Larghezze colonne specifiche */
+.gestione-fornitori .data-table th:nth-child(2),
+.gestione-fornitori .data-table td:nth-child(2) {
+  width: 8%;
+  min-width: 80px;
+  max-width: 100px;
+}
+
+/* Aumenta la larghezza della colonna Contatti */
+.gestione-fornitori .data-table th:nth-child(5),
+.gestione-fornitori .data-table td:nth-child(5) {
+  width: 20%;
+  min-width: 180px;
+  max-width: 250px;
+}
+
+/* Riduci la larghezza della colonna REA */
+.gestione-fornitori .data-table th:nth-child(6),
+.gestione-fornitori .data-table td:nth-child(6) {
+  width: 10%;
+  min-width: 100px;
+  max-width: 130px;
+}
+
+.detail-body .tipo-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.detail-body .tipo-badges .badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-body .tipo-badges .badge-fornitore {
+  background-color: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+}
+
+.detail-body .tipo-badges .badge-cliente {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+}
+
+/* Select nella modale */
+.detail-item select.form-input {
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #2c3e50;
+  background: white;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+  cursor: pointer;
+}
+
+.detail-item select.form-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+/* Textarea nella modale */
+.detail-item textarea.form-input {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+/* Badge Macrocategoria - colori distintivi (stili duplicati rimossi, usare quelli di GestioneFatture.css) */
+
+/* Badge Macrocategoria nella tabella - dimensioni uniformi definite in App.css */
+
+/* Stili specifici per le nuove macrocategorie */
+.badge-macrocategoria-personale {
+  background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
+  color: #831843;
+  border: 1px solid #f472b6;
+}
+
+.badge-macrocategoria-servizi {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #064e3b;
+  border: 1px solid #34d399;
+}
+
+.badge-macrocategoria-assicurazioni {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #78350f;
+  border: 1px solid #fbbf24;
+}
+
+.badge-macrocategoria-finanziario {
+  background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+  color: #5b21b6;
+  border: 1px solid #a78bfa;
+}
+
+.badge-macrocategoria-amministrativo {
+  background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+  color: #374151;
+  border: 1px solid #9ca3af;
+}
+
+/* ========== Layout Compatto Modale Fornitore ========== */
+.fornitore-compact-body {
+  padding: 0 ;
+}
+
+/* Card Hero principale */
+.fornitore-hero-card {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-bottom: 1px solid #e2e8f0;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fornitore-hero-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.fornitore-name-input {
+  font-size: 18px;
+  font-weight: 600;
+  padding: 8px 12px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.fornitore-hero-badges {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.fornitore-tipo-select,
+.fornitore-macro-select {
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 12px;
+  min-width: auto;
+  width: auto;
+}
+
+.fornitore-hero-details {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.fornitore-hero-piva {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.fornitore-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.fornitore-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e293b;
+  font-family: 'SF Mono', 'Menlo', monospace;
+}
+
+.fornitore-inline-input {
+  padding: 4px 8px !important;
+  font-size: 13px !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 4px !important;
+  min-width: 120px;
+}
+
+.fornitore-hero-contacts {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.fornitore-contact {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.fornitore-icon {
+  font-size: 14px;
+}
+
+/* Sezioni compatte */
+.fornitore-compact-sections {
+  padding: 12px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fornitore-compact-section {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+
+.fornitore-compact-section h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fornitore-compact-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  align-items: flex-end;
+}
+
+.fornitore-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 80px;
+}
+
+.fornitore-field.full-width {
+  flex: 1 1 100%;
+  min-width: 200px;
+}
+
+.fornitore-field label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.fornitore-field span {
+  font-size: 13px;
+  color: #374151;
+}
+
+.fornitore-field .form-input {
+  padding: 6px 10px !important;
+  font-size: 13px !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 4px !important;
+}
+
+.fornitore-compact-section textarea.form-input {
+  width: 100%;
+  min-height: 50px;
+  resize: vertical;
+}
+

@@ -1,0 +1,237 @@
+/* Stili per DettaglioPartitaModal - usa BaseModal quindi stili minimi */
+
+.dettaglio-partita-modal .base-modal-body {
+  padding: 20px;
+}
+
+/* Form section */
+.dettaglio-partita-modal .form-section {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dettaglio-partita-modal .form-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+/* Form grid - layout a due colonne */
+.dettaglio-partita-modal .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dettaglio-partita-modal .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.dettaglio-partita-modal .form-group.span-6 {
+  grid-column: span 1;
+}
+
+.dettaglio-partita-modal .form-group.span-12 {
+  grid-column: span 2;
+}
+
+/* Usa gli stili standard delle etichette da App.css/GestioneFatture.css */
+.dettaglio-partita-modal .form-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.dettaglio-partita-modal .form-group span {
+  font-size: 14px;
+  color: #2c3e50;
+  line-height: 1.5;
+  padding: 2px 0;
+  display: block;
+  min-height: 20px;
+}
+
+.dettaglio-partita-modal .form-group .highlight {
+  font-weight: 600;
+  color: #111827;
+}
+
+.dettaglio-partita-modal .form-group .monospace {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 13px;
+}
+
+.dettaglio-partita-modal .form-group .note-content {
+  font-size: 14px;
+  color: #2c3e50;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  padding: 8px 0;
+}
+
+/* Badge styles */
+.dettaglio-partita-modal .badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.dettaglio-partita-modal .badge-ingresso {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+}
+
+.dettaglio-partita-modal .badge-uscita {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+.dettaglio-partita-modal .badge-interno {
+  background-color: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+.dettaglio-partita-modal .badge-esterno {
+  background-color: #e0e7ff;
+  color: #3730a3;
+  border: 1px solid #a5b4fc;
+}
+
+/* Responsive: su schermi più piccoli, una colonna */
+@media (max-width: 1200px) {
+  .dettaglio-partita-modal .form-grid {
+    grid-template-columns: repeat(1, 1fr);
+  }
+  
+  .dettaglio-partita-modal .form-group.span-12,
+  .dettaglio-partita-modal .form-group.span-6 {
+    grid-column: span 1;
+  }
+}
+
+/* Rimuovi stili legacy che potrebbero interferire */
+.dettaglio-partita-modal .partita-section {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+.dettaglio-partita-modal .partita-section h4 {
+  display: none;
+}
+
+/* Table container per pesi individuali (se presente) */
+.dettaglio-partita-modal .table-container {
+  margin-top: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.dettaglio-partita-modal .data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.dettaglio-partita-modal .data-table thead {
+  background: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.dettaglio-partita-modal .data-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 13px;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.dettaglio-partita-modal .data-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #1f2937;
+}
+
+.dettaglio-partita-modal .data-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.dettaglio-partita-modal .data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.dettaglio-partita-modal .empty-state {
+  padding: 40px 20px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* Form inputs per modifica */
+.dettaglio-partita-modal .form-group input,
+.dettaglio-partita-modal .form-group textarea,
+.dettaglio-partita-modal .form-group select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #111827;
+  background: #fff;
+  box-sizing: border-box;
+  line-height: 1.5;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dettaglio-partita-modal .form-group input:focus,
+.dettaglio-partita-modal .form-group textarea:focus,
+.dettaglio-partita-modal .form-group select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.dettaglio-partita-modal .form-group .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: normal;
+  text-transform: none;
+  letter-spacing: normal;
+  color: #111827;
+  cursor: pointer;
+}
+
+.dettaglio-partita-modal .form-group .checkbox-label input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+  cursor: pointer;
+}
+
+.dettaglio-partita-modal .form-group small {
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.4;
+  margin-top: 2px;
+}

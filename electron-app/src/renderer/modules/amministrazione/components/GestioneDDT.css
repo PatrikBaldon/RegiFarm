@@ -1,0 +1,355 @@
+.gestione-ddt {
+  padding: 1rem;
+}
+
+.gestione-ddt > .table-wrapper {
+  margin-top: 0 !important; /* Header tocca il bordo superiore */
+  padding-top: 0 !important;
+}
+
+.gestione-ddt .filters-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px; /* Ridotto da 1rem */
+}
+
+.gestione-ddt .filters-actions button {
+  margin-left: auto;
+}
+
+.gestione-ddt .filters-bar {
+  margin-bottom: 4px; /* Ridotto da 1rem */
+  margin-top: 0;
+  background: transparent !important; /* Container trasparente */
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.gestione-ddt .filters-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  background: transparent !important; /* Riga filtri trasparente */
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.gestione-ddt .filter-group {
+  flex: 1;
+  border: none !important; /* Rimuovi bordo */
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.gestione-ddt .filter-group.search {
+  flex: 2;
+}
+
+.gestione-ddt .filter-group label {
+  display: block;
+  margin-bottom: 2px; /* Ridotto da 0.25rem */
+  font-size: 12px; /* Stesso font-size di GestioneFornitori */
+  font-weight: 500;
+  color: #333; /* Label visibile */
+  background: transparent !important;
+}
+
+.gestione-ddt .filter-group input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd; /* Mantieni bordo per visibilità input */
+  border-radius: 4px;
+  font-size: 12px; /* Stesso font-size di GestioneFornitori */
+  background: white; /* Background bianco per input */
+  box-shadow: none !important;
+}
+
+/* DDT Form Modal */
+.ddt-form {
+  padding: 0;
+}
+
+.ddt-modal-tabs {
+  display: flex;
+  border-bottom: none; /* Rimossa la linea sotto */
+  margin-bottom: 1rem; /* Ridotto da 1.5rem */
+}
+
+.ddt-tab {
+  padding: 0.5rem 1rem; /* Ridotto padding */
+  background: none;
+  border: none;
+  border-bottom: none; /* Rimossa la linea sotto */
+  cursor: pointer;
+  font-size: 13px; /* Ridotto da 14px */
+  font-weight: 500;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.ddt-tab:hover {
+  color: #333;
+  background-color: #f5f5f5;
+}
+
+.ddt-tab.active {
+  color: #2E7D32; /* Solo evidenziazione sul testo */
+  border-bottom: none; /* Rimossa la linea verde */
+  font-weight: 600;
+}
+
+.ddt-tab-content {
+  min-height: 300px;
+  position: relative;
+}
+
+.ddt-form .form-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 colonne uniformi */
+  gap: 0.75rem; /* Ridotto da 1rem */
+}
+
+.ddt-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem; /* Ridotto da 0.25rem */
+}
+
+.ddt-form .form-group.span-2 {
+  grid-column: span 2; /* Occupa 2 colonne */
+}
+
+.ddt-form .form-group.span-3 {
+  grid-column: span 3; /* Occupa 3 colonne */
+}
+
+.ddt-form .form-group.span-4 {
+  grid-column: span 4; /* Occupa tutte e 4 le colonne */
+}
+
+.ddt-form .form-group label {
+  font-size: 13px; /* Ridotto da 14px */
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 0.2rem; /* Aggiunto per controllo migliore */
+}
+
+.ddt-form .form-group input,
+.ddt-form .form-group textarea,
+.ddt-form .form-group select {
+  padding: 6px 10px; /* Ridotto da 8px 12px */
+  border: 1px solid #e0e0e0;
+  border-radius: 4px; /* Ridotto da 6px */
+  font-size: 13px; /* Ridotto da 14px */
+  color: #2c3e50;
+}
+
+.ddt-form .form-group input:focus,
+.ddt-form .form-group textarea:focus,
+.ddt-form .form-group select:focus {
+  outline: none;
+  border-color: #2E7D32;
+  box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.1);
+}
+
+.ddt-form .form-group span {
+  padding: 6px 10px; /* Ridotto da 0.5rem */
+  color: #666;
+  min-height: 1.5rem;
+  font-size: 13px; /* Allineato agli input */
+}
+
+/* Articoli Section */
+.articoli-section {
+  padding: 0.25rem 0; /* Ridotto da 0.5rem */
+}
+
+.articoli-section table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.75rem; /* Ridotto da 1rem */
+}
+
+.articoli-section table th,
+.articoli-section table td {
+  padding: 6px 8px; /* Ridotto da 0.5rem */
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.articoli-section table th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+  font-size: 12px; /* Stesso font-size di GestioneFornitori */
+}
+
+.articoli-section table input {
+  width: 100%;
+  padding: 6px 10px; /* Ridotto da 8px 12px */
+  border: 1px solid #e0e0e0;
+  border-radius: 4px; /* Ridotto da 6px */
+  font-size: 13px; /* Ridotto da 14px */
+  color: #2c3e50;
+}
+
+.articoli-section .btn-sm {
+  padding: 4px 8px; /* Ridotto */
+  font-size: 12px; /* Ridotto da 0.75rem */
+}
+
+/* Table styles */
+.gestione-ddt .table-wrapper {
+  overflow-x: auto;
+  margin-bottom: 1rem;
+  margin-top: 0 !important; /* Header tocca il bordo superiore */
+  padding-top: 0 !important;
+}
+
+.gestione-ddt > .table-wrapper {
+  margin-top: 0 !important; /* Ridotto spazio sopra la tabella */
+}
+
+.gestione-ddt .table-container {
+  min-width: 100%;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.gestione-ddt .data-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  font-size: 12px; /* Stesso font-size di GestioneFornitori */
+  margin: 0 !important; /* Rimuovi tutti i margini */
+  padding: 0 !important; /* Rimuovi tutti i padding */
+}
+
+.gestione-ddt .data-table thead {
+  background-color: #f5f5f5;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.gestione-ddt .data-table thead tr {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.gestione-ddt .data-table thead tr th:first-child {
+  padding-top: 5px; /* Mantieni solo padding interno per allineamento */
+}
+
+.gestione-ddt .data-table th {
+  padding: 5px 6px; /* Stesso padding di GestioneFornitori */
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px; /* Stesso font-size di GestioneFornitori */
+  line-height: 1.4;
+  border-bottom: 2px solid #ddd;
+  color: #333;
+}
+
+.gestione-ddt .data-table td {
+  padding: 10px 10px; /* Stesso padding di GestioneFornitori */
+  font-size: 12px; /* Stesso font-size di GestioneFornitori */
+  line-height: 1.5;
+  border-bottom: 1px solid #e0e0e0;
+  vertical-align: middle;
+}
+
+.gestione-ddt .data-table tbody tr {
+  transition: background-color 0.2s;
+}
+
+.gestione-ddt .data-table tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+.gestione-ddt .table-row-clickable {
+  cursor: pointer;
+}
+
+.gestione-ddt .empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: #999;
+  font-style: italic;
+}
+
+/* Pagination */
+.gestione-ddt .pagination-fixed-bottom {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.gestione-ddt.modal-open .pagination-fixed-bottom {
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.gestione-ddt .pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.gestione-ddt .pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.gestione-ddt .pagination-btn {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px; /* Stesso font-size di GestioneFornitori */
+  transition: all 0.2s;
+}
+
+.gestione-ddt .pagination-btn:hover:not(:disabled) {
+  background-color: #f5f5f5;
+  border-color: #2E7D32;
+}
+
+.gestione-ddt .pagination-btn.active {
+  background-color: #2E7D32;
+  color: white;
+  border-color: #2E7D32;
+}
+
+.gestione-ddt .pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.gestione-ddt .pagination-btn-prev,
+.gestione-ddt .pagination-btn-next {
+  padding: 0.5rem;
+  min-width: 2.5rem;
+}
+
+/* Z-index elevato per SmartSelect "Trasporto a Mezzo" per evitare scrolling */
+.ddt-trasporto-mezzo-select {
+  position: relative;
+  z-index: 10;
+}
+
+.ddt-trasporto-mezzo-select .simple-select-menu,
+.ddt-trasporto-mezzo-select .simple-select-menu-fixed,
+.ddt-trasporto-mezzo-select .searchable-select-dropdown,
+.ddt-trasporto-mezzo-select .searchable-select-dropdown-fixed {
+  z-index: 10001 !important;
+}
+
+.ddt-trasporto-mezzo-select .simple-select-menu-fixed,
+.ddt-trasporto-mezzo-select .searchable-select-dropdown-fixed {
+  position: fixed !important;
+}
+

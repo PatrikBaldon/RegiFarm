@@ -1,0 +1,50 @@
+.form-group .searchable-select-container {
+  width: 100%;
+}
+
+.form-group .searchable-select-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.form-group .searchable-select-input:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.vendite-prodotti {
+  padding: 20px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.positive {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.negative {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  margin-right: 4px;
+}
+
+.btn-icon:hover {
+  transform: scale(1.1);
+}
+

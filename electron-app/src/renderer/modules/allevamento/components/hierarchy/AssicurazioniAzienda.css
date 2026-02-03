@@ -1,0 +1,154 @@
+.assicurazioni-azienda {
+  margin-top: 20px;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  border: none;
+  width: 100%;
+}
+
+.assicurazioni-azienda .section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  gap: 12px;
+  min-width: 0;
+  width: 100%;
+}
+
+.assicurazioni-azienda .section-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 16px;
+  font-weight: 600;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.assicurazioni-azienda .section-header button {
+  flex-shrink: 0;
+  white-space: nowrap;
+  padding: 6px 12px;
+  font-size: 13px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.assicurazioni-azienda .empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.assicurazioni-azienda .table-container {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+}
+
+.assicurazioni-azienda .table-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.assicurazioni-azienda .table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.assicurazioni-azienda .table-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.assicurazioni-azienda .table-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.assicurazioni-azienda .table {
+  width: 100%;
+  min-width: 800px;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+}
+
+.assicurazioni-azienda .table thead {
+  background: #f3f4f6;
+}
+
+.assicurazioni-azienda .table th,
+.assicurazioni-azienda .table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.assicurazioni-azienda .table tr.row-expired {
+  background: #fee2e2;
+}
+
+.assicurazioni-azienda .table tr.row-warning {
+  background: #fef3c7;
+}
+
+/* Badge nella tabella - dimensioni uniformi definite in App.css */
+.badge-danger {
+  background: #dc2626;
+  color: white;
+}
+
+.badge-warning {
+  background: #f59e0b;
+  color: white;
+}
+
+.badge-success {
+  background: #10b981;
+  color: white;
+}
+
+.badge-secondary {
+  background: #6b7280;
+  color: white;
+}
+
+.ml-2 {
+  margin-left: 8px;
+}
+
+.btn-icon {
+  background: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 6px 12px;
+  font-size: 12px;
+  margin-right: 4px;
+  border-radius: 4px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-icon:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
+}
+
+.btn-icon.btn-danger {
+  background: #dc3545;
+}
+
+.btn-icon.btn-danger:hover {
+  background: #c82333;
+}
+
+/* Modal Styles - Ora usa BaseModal, gli stili sono gestiti da BaseModal.css */
+

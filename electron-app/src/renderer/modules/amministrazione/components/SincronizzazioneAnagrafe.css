@@ -1,0 +1,1177 @@
+/* ========================================
+   SincronizzazioneAnagrafe - Stili
+   ======================================== */
+
+/* Container principale */
+.sincronizzazione-anagrafe {
+  padding: 20px;
+}
+
+.section {
+  margin-bottom: 40px;
+}
+
+.section h3 {
+  margin: 0 0 15px 0;
+  color: #2c3e50;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Header con azioni */
+.header-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.header-actions .btn {
+  min-height: 36px;
+  padding: 8px 16px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+/* Sezione upload */
+.upload-section {
+  padding: 16px;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.help-text {
+  margin-top: 8px;
+  margin-bottom: 0;
+  color: #666;
+  font-size: 13px;
+}
+
+/* Badge */
+.badge-info {
+  background-color: #3b82f6;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.badge-success {
+  background-color: #10b981;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.badge-warning {
+  background-color: #f59e0b;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Risultati upload */
+.upload-result {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.upload-result.success {
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+}
+
+.upload-result.error {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+.upload-result-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.upload-result h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.upload-result-message {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.partite-summary,
+.partite-individuali {
+  margin-top: 0;
+  padding: 8px 10px;
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.partite-summary-header,
+.partite-individuali-header {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+  color: inherit;
+  opacity: 0.9;
+}
+
+.partite-summary-content,
+.partite-individuali-content {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 16px;
+  align-items: center;
+}
+
+.partite-summary-item,
+.partite-individuali-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.partite-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  min-width: fit-content;
+}
+
+.partite-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: inherit;
+}
+
+.partite-summary-hint {
+  margin: 0;
+  margin-top: 2px;
+  font-size: 11px;
+  font-style: italic;
+  color: inherit;
+  opacity: 0.8;
+  line-height: 1.3;
+}
+
+.errors-list {
+  margin-top: 0;
+  padding: 8px 10px;
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.errors-list-header {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+  color: inherit;
+  opacity: 0.9;
+}
+
+.errors-list-items {
+  margin: 0;
+  padding-left: 16px;
+  list-style-type: disc;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.errors-list-items li {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.info-text {
+  margin: 0;
+  margin-top: 2px;
+  font-size: 11px;
+  font-style: italic;
+  color: inherit;
+  opacity: 0.85;
+  line-height: 1.3;
+}
+
+.upload-result-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 2px;
+  flex-wrap: wrap;
+}
+
+/* Bovini summary (fuori da modali) */
+.bovini-summary {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  background-color: #f9fafb;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bovini-summary__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 13px;
+  color: #374151;
+}
+
+.bovini-summary__list li {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 2px 0;
+}
+
+.monospace {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  letter-spacing: 0.01em;
+}
+
+.bovini-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.bovini-table-wrapper {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.bovini-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.bovini-table thead {
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.bovini-table th,
+.bovini-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.bovini-table tbody tr {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.bovini-table tbody tr:hover {
+  background-color: #f3f4f6;
+}
+
+.bovini-table td:nth-child(7) {
+  white-space: nowrap;
+}
+
+.bovini-summary__more {
+  font-style: italic;
+  color: #6b7280;
+}
+
+.form-hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.bovino-row {
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.bovino-row .form-group {
+  flex: 1;
+  min-width: 140px;
+}
+
+.bovino-row .form-group:last-child {
+  flex: 0 0 auto;
+}
+
+/* ========================================
+   Modali Bovini e Decessi dentro BaseModal
+   ======================================== */
+
+.base-modal-content.modal-bovini .base-modal-body {
+  padding: 16px;
+}
+
+.modal-bovini .table-wrapper {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 0;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.modal-bovini .table-wrapper .table {
+  margin: 0;
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+.modal-bovini .table thead {
+  background: linear-gradient(90deg, #f3f4f6 0%, #eef2ff 100%);
+  border-bottom: 2px solid #e5e7eb;
+  margin-top: 0;
+}
+
+/* Stili generali per table-wrapper e table (usati in SelezionaCapiModal) */
+.table-wrapper {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 0;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.table-wrapper .table {
+  margin: 0;
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+.table-wrapper .table thead {
+  background: linear-gradient(90deg, #f3f4f6 0%, #eef2ff 100%);
+  border-bottom: 2px solid #e5e7eb;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.table-wrapper .table thead tr {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.table-wrapper .table thead th {
+  padding: 12px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+  margin: 0;
+}
+
+.modal-bovini .table th {
+  padding: 12px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.modal-bovini .table td {
+  padding: 12px 14px;
+  font-size: 13px;
+  vertical-align: middle;
+  color: #1f2937;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-bovini .table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.modal-bovini .table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+/* Input nelle celle della tabella */
+.modal-bovini .table td input[type="text"],
+.modal-bovini .table td input[type="number"],
+.modal-bovini .table td input[type="date"] {
+  width: 100%;
+  min-width: 120px;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #111827;
+  background: #fff;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  line-height: 1.4;
+}
+
+.modal-bovini .table td input[type="date"] {
+  min-width: 140px;
+}
+
+.modal-bovini .table td input[type="number"] {
+  min-width: 100px;
+}
+
+.modal-bovini .table td input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* SearchableSelect nelle celle */
+.modal-bovini .table td .searchable-select-container {
+  width: 100%;
+  min-width: 120px;
+}
+
+.modal-bovini .table td .searchable-select-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #111827;
+  background: #fff;
+  box-sizing: border-box;
+  min-height: 34px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.modal-bovini .table td .searchable-select-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Colonna azioni */
+.modal-bovini .table-actions {
+  width: auto;
+  min-width: 100px;
+  text-align: right;
+  white-space: nowrap;
+  padding-left: 8px;
+}
+
+.modal-bovini .table-actions .btn {
+  padding: 6px 14px;
+  font-size: 12px;
+  min-height: 32px;
+  white-space: nowrap;
+}
+
+/* Colonne con larghezza ottimizzata */
+.modal-bovini .table th:nth-child(1),
+.modal-bovini .table td:nth-child(1) {
+  min-width: 180px; /* Auricolare */
+}
+
+.modal-bovini .table th:nth-child(2),
+.modal-bovini .table td:nth-child(2) {
+  min-width: 140px; /* Data nascita / Valore */
+}
+
+.modal-bovini .table th:nth-child(3),
+.modal-bovini .table td:nth-child(3) {
+  min-width: 120px; /* Sesso / Note */
+}
+
+.modal-bovini .table th:nth-child(4),
+.modal-bovini .table td:nth-child(4) {
+  min-width: 140px; /* Razza */
+}
+
+.modal-bovini .table th:nth-child(5),
+.modal-bovini .table td:nth-child(5) {
+  min-width: 110px; /* Peso */
+}
+
+.modal-bovini .table th:nth-child(6),
+.modal-bovini .table td:nth-child(6) {
+  width: auto; /* Azioni */
+}
+
+/* ========================================
+   Form dentro BaseModal
+   ======================================== */
+
+/* Ottimizzazione layout form-row per miglior utilizzo dello spazio */
+.base-modal-body .form-row {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+  align-items: start;
+}
+
+/* Form-group occupa 6 colonne di default (metà larghezza) */
+.base-modal-body .form-row > .form-group {
+  grid-column: span 6;
+}
+
+/* Form-group a larghezza piena quando è solo */
+.base-modal-body .form-row > .form-group:only-child {
+  grid-column: span 12;
+}
+
+/* Responsive: su schermi più piccoli, form-group occupa tutta la larghezza */
+@media (max-width: 1200px) {
+  .base-modal-body .form-row > .form-group {
+    grid-column: span 12;
+  }
+}
+
+/* Miglioramento spacing e dimensioni form-group */
+.base-modal-body .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0; /* Permette shrink corretto in grid */
+}
+
+.base-modal-body .form-group label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  line-height: 1.4;
+}
+
+.base-modal-body .form-group input,
+.base-modal-body .form-group textarea,
+.base-modal-body .form-group select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #111827;
+  background: #fff;
+  box-sizing: border-box;
+  line-height: 1.5;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.base-modal-body .form-group input[type="date"] {
+  padding: 9px 12px;
+  min-height: 38px;
+}
+
+.base-modal-body .form-group input:focus,
+.base-modal-body .form-group textarea:focus,
+.base-modal-body .form-group select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.base-modal-body .form-group input:disabled,
+.base-modal-body .form-group input[readonly] {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+  color: #6b7280;
+}
+
+.base-modal-body .form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.base-modal-body .form-group small {
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+/* SearchableSelect dentro form-group */
+.base-modal-body .form-group .searchable-select-container {
+  width: 100%;
+}
+
+.base-modal-body .form-group .searchable-select-input {
+  width: 100%;
+  padding: 9px 12px;
+  min-height: 38px;
+  box-sizing: border-box;
+}
+
+/* Form-group checkbox */
+.base-modal-body .form-group--checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.base-modal-body .form-group--checkbox label {
+  font-weight: normal;
+  margin: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.base-modal-body .form-group--checkbox input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* Section title */
+.base-modal-body .section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin-top: 28px;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.base-modal-body .section-title:first-child {
+  margin-top: 0;
+}
+
+/* Bovini summary dentro BaseModal */
+.base-modal-body .bovini-summary {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #ffffff;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.base-modal-body .bovini-summary .info-text {
+  margin: 0;
+  color: #374151;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.base-modal-body .bovini-summary .bovini-summary__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.base-modal-body .bovini-summary .bovini-summary__list li {
+  padding: 4px 0;
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.base-modal-body .bovini-summary button {
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+/* ========================================
+   Pulsanti Icona
+   ======================================== */
+
+.btn-icon {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 8px;
+  color: #374151;
+  transition: color 0.2s ease, background-color 0.2s ease;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.btn-icon:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+.btn-icon.danger {
+  color: #dc2626;
+}
+
+.btn-icon.danger:hover {
+  background-color: #fef2f2;
+  color: #b91c1c;
+}
+
+.btn-icon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ========================================
+   Tabella Partite
+   ======================================== */
+
+.table-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  min-width: 800px;
+}
+
+.data-table thead {
+  background: linear-gradient(90deg, #f9fafb 0%, #f3f4f6 100%);
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.data-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 13px;
+  color: #374151;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.data-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #1f2937;
+  vertical-align: middle;
+}
+
+.data-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.data-table tbody tr:hover {
+  background-color: #f9fafb;
+  cursor: pointer;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table .empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6b7280;
+  font-size: 14px;
+  font-style: italic;
+}
+
+/* Badge nella tabella - dimensioni uniformi definite in App.css */
+.data-table .badge-success {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+}
+
+.data-table .badge-info {
+  background-color: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+}
+
+.data-table .badge-warning {
+  background-color: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+/* ========================================
+   Barra di Ricerca Partite
+   ======================================== */
+
+.partite-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.partite-search-bar:focus-within {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.partite-search-input-wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 500px;
+  min-width: 280px;
+}
+
+.partite-search-input-wrapper::before {
+  content: '🔍';
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  pointer-events: none;
+  opacity: 0.5;
+  z-index: 1;
+}
+
+.partite-search-input {
+  width: 100%;
+  padding: 8px 12px 8px 38px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #111827;
+  background-color: #ffffff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+  height: 38px;
+}
+
+.partite-search-input::placeholder {
+  color: #9ca3af;
+}
+
+.partite-search-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.partite-search-clear {
+  padding: 8px 16px;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.partite-search-clear:hover {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+  color: #111827;
+}
+
+.partite-search-clear:active {
+  background-color: #e5e7eb;
+  transform: translateY(1px);
+}
+
+.partite-search-results-count {
+  font-size: 13px;
+  color: #6b7280;
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+/* Motivo help text */
+.motivo-help-text {
+  font-weight: normal;
+  color: #2563eb;
+  font-size: 13px;
+  margin-left: 6px;
+}
+
+/* Radio gestione peso */
+.peso-radio-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.peso-radio-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-weight: 500;
+  color: #111827;
+}
+
+.peso-radio-option input {
+  margin: 0;
+  outline: none;
+  box-shadow: none;
+  accent-color: #4b5563;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #9ca3af;
+}
+
+.peso-radio-option input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* ========================================
+   Modale scelta movimento
+   ======================================== */
+
+/* Override al contenitore della modale */
+.base-modal-content.modal-tipo-movimento {
+  width: min(720px, 90vw);
+  max-width: none;
+  height: 20vh;
+  max-height: 20vh;
+  min-height: 220px;
+}
+
+.movimento-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  height: 100%;
+  align-content: stretch;
+  grid-auto-rows: 1fr;
+}
+
+.movimento-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 25px 18px !important;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  text-align: left;
+  background: linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+  height: 100%;
+  min-height: 110px;
+}
+
+.movimento-card strong {
+  font-size: 15px;
+  color: #111827;
+}
+
+.movimento-hint {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.movimento-card:hover,
+.movimento-card:focus-visible {
+  transform: translateY(-1px);
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.movimento-card:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.movimento-card.ingresso {
+  border-left: 4px solid #2563eb;
+}
+
+.movimento-card.uscita {
+  border-left: 4px solid #0ea5e9;
+}
+
+.movimento-card.trasferimento {
+  border-left: 4px solid #22c55e;
+}
+
+.movimento-card.decesso {
+  border-left: 4px solid #ef4444;
+}
+
+@media (max-width: 520px) {
+  .movimento-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ========================================
+   Filtri modale selezione capi
+   ======================================== */
+
+.filtri-selezione-capi {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  background: #f9fafb;
+}
+
+.filtri-selezione-capi__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.filtri-selezione-capi__field {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.filtri-selezione-capi__field--search {
+  flex: 1 1 200px;
+  min-width: 150px;
+}
+
+.filtri-selezione-capi__field--sesso {
+  flex: 0 0 120px;
+}
+
+.filtri-selezione-capi__field--razza {
+  flex: 0 0 140px;
+}
+
+.filtri-selezione-capi__field--data {
+  flex: 0 0 140px;
+}
+
+.filtri-selezione-capi__field--button {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filtri-selezione-capi__label {
+  font-size: 12px;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.filtri-selezione-capi__input {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background: #fff;
+  min-height: 36px;
+  box-sizing: border-box;
+  font-family: inherit;
+  color: #2c3e50;
+}
+
+.filtri-selezione-capi__input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.filtri-selezione-capi__button {
+  white-space: nowrap;
+  height: 28px;
+  min-height: 28px;
+  padding: 4px 12px;
+  font-size: 13px;
+}
+
+.filtri-selezione-capi__counter {
+  font-size: 11px;
+  color: #666;
+  text-align: center;
+}
+
+/* ========================================
+   Paginazione fissa in basso
+   ======================================== */
+
+.sincronizzazione-anagrafe .pagination-fixed-bottom {
+  position: fixed;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  pointer-events: none;
+  z-index: 100;
+  width: 100%;
+}
+
+/* Nasconde la pagination quando un modale è aperto (evita che compaia sopra/sotto il modale) */
+.sincronizzazione-anagrafe.modal-open .pagination-fixed-bottom {
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sincronizzazione-anagrafe .pagination-fixed-bottom .pagination {
+  pointer-events: auto;
+  background: transparent;
+}

@@ -1,0 +1,46 @@
+.attrezzatura-module {
+  padding: 20px;
+}
+
+.attrezzatura-header {
+  margin-bottom: 20px;
+}
+
+.attrezzatura-header h2 {
+  margin: 0;
+  color: #333;
+}
+
+.attrezzatura-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.tab-button {
+  padding: 12px 24px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  color: #666;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s;
+}
+
+.tab-button:hover {
+  color: #007bff;
+  background: #f8f9fa;
+}
+
+.tab-button.active {
+  color: #007bff;
+  border-bottom-color: #007bff;
+  font-weight: 600;
+}
+
+.attrezzatura-content {
+  padding-top: 20px;
+}
+

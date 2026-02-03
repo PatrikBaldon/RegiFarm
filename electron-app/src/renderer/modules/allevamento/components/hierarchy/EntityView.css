@@ -1,0 +1,449 @@
+.entity-view {
+  width: 100%;
+}
+
+.entity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.single-azienda-banner {
+  margin: 0;
+  padding: 6px 12px;
+  background: #f5f7fa;
+  border-radius: 6px;
+  color: #2c3e50;
+  font-size: 14px;
+  max-width: 320px;
+}
+
+.entity-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 4px 0;
+}
+
+.entity-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.azienda-pill {
+  padding: 6px 12px;
+  background: #f5f7fa;
+  border-radius: 6px;
+  color: #2c3e50;
+  font-size: 14px;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+}
+
+.btn-primary {
+  background: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background: #0056b3;
+}
+
+.btn-secondary {
+  background: #f8f9fa;
+  color: #666;
+  border: 1px solid #e0e0e0;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: #e9ecef;
+  border-color: #007bff;
+  color: #007bff;
+}
+
+/* Form modal styles removed - now using BaseModal */
+/* When inside BaseModal, form-group, label, input, select, textarea are styled by BaseModal.css */
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.form-group .searchable-select-container {
+  width: 100%;
+}
+
+.form-group .searchable-select-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.form-group .searchable-select-input:disabled {
+  background: #f0f0f0;
+  cursor: not-allowed;
+}
+
+.form-group textarea {
+  resize: vertical;
+  font-family: inherit;
+}
+
+/* Form row and form actions removed - now using BaseModal with form-grid and footerActions */
+
+.entity-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.entity-card {
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  background: white;
+  cursor: default;
+  transition: all 0.2s ease;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+}
+
+.entity-card:hover {
+  border-color: #007bff;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.entity-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.entity-card-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.entity-badge {
+  font-size: 12px;
+  color: #666;
+  background: #f8f9fa;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.entity-card-body {
+  margin-bottom: 12px;
+  flex: 1;
+  min-height: 0;
+}
+
+.entity-card-body p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.entity-card-body strong {
+  color: #2c3e50;
+}
+
+.entity-card-footer {
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.entity-action {
+  font-size: 12px;
+  color: #007bff;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-block;
+  transition: color 0.2s ease;
+}
+
+.entity-action:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+}
+
+.empty-state p {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+/* Box specific styles */
+.box-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.box-card {
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.box-card:hover {
+  border-color: #007bff;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+}
+
+.box-card.full {
+  border-color: #dc3545;
+  background: #fff5f5;
+}
+
+.box-card.occupato {
+  border-color: #ffc107;
+}
+
+.box-card.libero {
+  border-color: #28a745;
+}
+
+.box-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0;
+}
+
+.box-card-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.box-capacity {
+  margin-bottom: 0;
+}
+
+.capacity-bar {
+  height: 6px;
+  background: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0;
+}
+
+.capacity-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #28a745, #20c997);
+  transition: width 0.3s ease;
+}
+
+.box-card.full .capacity-fill {
+  background: linear-gradient(90deg, #dc3545, #fd7e14);
+}
+
+.box-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.box-capacity-info {
+  font-size: 11px;
+  color: #666;
+  font-weight: 500;
+  flex: 0 0 auto;
+}
+
+.box-status {
+  flex: 0 0 auto;
+}
+
+.box-animals {
+  min-height: 80px;
+  max-height: 200px; /* Altezza maggiore per dare priorità ai numeri - circa 20 animali */
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px 6px;
+  padding: 8px 12px;
+  background: transparent;
+  border-radius: 0;
+  margin-bottom: 8px;
+  margin-top: 8px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border: none;
+  box-sizing: border-box;
+}
+
+/* Scrollbar personalizzata per box-animals */
+.box-animals::-webkit-scrollbar {
+  width: 8px;
+}
+
+.box-animals::-webkit-scrollbar-track {
+  background: #e9ecef;
+  border-radius: 4px;
+}
+
+.box-animals::-webkit-scrollbar-thumb {
+  background: #6c757d;
+  border-radius: 4px;
+}
+
+.box-animals::-webkit-scrollbar-thumb:hover {
+  background: #5a6268;
+}
+
+.animal-tag {
+  width: 100%;
+  min-width: 0;
+  height: 28px;
+  padding: 6px 8px;
+  background: #007bff;
+  color: white;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+  transition: all 0.2s ease;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.animal-tag:hover {
+  transform: scale(1.05);
+  box-shadow: 0 3px 6px rgba(0, 123, 255, 0.3);
+}
+
+.empty-box {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #999;
+  font-size: 12px;
+  font-style: italic;
+  padding: 8px;
+}
+
+
+.status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-radius: 10px;
+}
+
+.status-badge.libero {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge.occupato {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge.pulizia {
+  background: #cfe2ff;
+  color: #084298;
+}
+
+.status-badge.manutenzione {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.entity-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-icon {
+  background: none !important;
+  border: none !important;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px !important;
+  min-width: auto !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: auto !important;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.btn-icon:hover {
+  background: none !important;
+  border: none !important;
+  transform: none !important;
+  box-shadow: none !important;
+  opacity: 1;
+}
+
+.btn-icon.btn-danger {
+  color: #dc2626;
+  opacity: 0.7;
+}
+
+.btn-icon.btn-danger:hover {
+  background: none !important;
+  border: none !important;
+  color: #dc2626;
+  opacity: 1;
+}
+

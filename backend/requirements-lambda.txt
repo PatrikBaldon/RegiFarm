@@ -1,0 +1,28 @@
+# FastAPI and Server
+fastapi==0.109.0
+mangum==0.17.0
+
+# Database
+sqlalchemy==2.0.25
+psycopg2-binary==2.9.9
+
+# Data Validation
+pydantic==2.5.3
+pydantic-settings==2.1.0
+email-validator==2.1.0  # Richiesto da pydantic per validazione email
+
+# Upload & form handling
+python-multipart==0.0.6
+
+# Utilities
+python-dateutil==2.8.2
+openpyxl==3.1.2
+pandas==2.1.4
+reportlab==4.0.7
+beautifulsoup4==4.12.2
+supabase==2.3.1
+gotrue==2.4.3
+
+# Note: uvicorn non è necessario su Lambda (solo per sviluppo locale)
+# alembic non è necessario nel package Lambda (solo per migrazioni)
+
