@@ -50,6 +50,11 @@ const DettaglioPartitaModal = ({ isOpen, onClose, partitaId, onUpdate, onDelete 
       
       // Carica dettagli partita
       const partitaData = await amministrazioneService.getPartita(partitaId);
+      if (!partitaData) {
+        setError('Partita non trovata. Potrebbe essere stata eliminata o non ancora sincronizzata.');
+        setLoading(false);
+        return;
+      }
       setPartita(partitaData);
       setFormData({
         data: partitaData.data ? new Date(partitaData.data).toISOString().split('T')[0] : '',

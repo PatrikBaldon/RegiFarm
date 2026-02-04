@@ -683,7 +683,10 @@ class HybridDataService {
 
   async getPartita(id) {
     if (this.isLocalAvailable()) {
-      return localDataService.getPartita(id);
+      const local = await localDataService.getPartita(id);
+      // Fallback a API se non in locale (es. partita creata via anagrafe su Supabase, sync non ancora completato)
+      if (local != null) return local;
+      return api.get(`/amministrazione/partite/${id}`);
     }
     return api.get(`/amministrazione/partite/${id}`);
   }
