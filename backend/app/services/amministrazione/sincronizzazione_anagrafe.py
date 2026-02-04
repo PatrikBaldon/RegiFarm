@@ -377,7 +377,8 @@ _CODICI_MOTIVO_DECESSO = ("D", "02", "2")
 
 def group_decessi(columns: List[str], rows: List[Dict[str, Any]], azienda_codice: str, azienda_id: int, db: Session, animali_esistenti_map: Optional[dict] = None) -> List[Dict]:
     """
-    Raggruppa decessi (MOTIVO_USCITA = 'D', '02' o '2') per data di uscita.
+    Raggruppa decessi (MOTIVO_USCITA = 'D', '02' o '2') per data di uscita E codice stalla.
+    Più gruppi nella stessa giornata (es. 2 stalle diverse) vengono trattati separatamente.
     L'anagrafe è passata da D a 2: supportiamo entrambi i codici.
     Funziona con lista di dict (senza pandas).
     """
@@ -422,7 +423,9 @@ def group_decessi(columns: List[str], rows: List[Dict[str, Any]], azienda_codice
         data_macellazione = parse_date(data_macellazione_val) if data_macellazione_val else None
         data_provv_val = _row_val(row, "DATA_PROVVEDIMENTO")
         data_provvvedimento = parse_date(data_provv_val) if data_provv_val else None
-        data_key = data_decesso.isoformat() if isinstance(data_decesso, date) else str(data_decesso)
+        # Chiave composita: data + codice_stalla per gestire più gruppi nello stesso giorno (stalle diverse)
+        codice_stalla_key = (codice_stalla_decesso or "").strip() or "_default"
+        data_key = f"{data_decesso.isoformat() if isinstance(data_decesso, date) else str(data_decesso)}__{codice_stalla_key}"
         if data_key not in gruppi_decessi:
             gruppi_decessi[data_key] = {
                 "data_uscita": data_decesso,
@@ -467,40 +470,45 @@ def filter_existing_decessi(
     """
     Filtra i gruppi decessi già registrati nel database usando query batch per ottimizzazione.
     
-    Un gruppo è considerato duplicato se esiste già un gruppo con stessa data_uscita e azienda_id.
+    Un gruppo è considerato duplicato se esiste già un gruppo con stessa data_uscita,
+    stesso codice_stalla_decesso e azienda_id (più gruppi nello stesso giorno in stalle diverse
+    sono trattati separatamente).
     """
     if not gruppi_decessi:
         return []
     
     from app.models.allevamento.gruppo_decessi import GruppoDecessi
-    from sqlalchemy import or_
     
-    # Estrai tutte le date per query batch
-    date_uscita = [
-        gruppo.get('data_uscita')
-        for gruppo in gruppi_decessi
-        if gruppo.get('data_uscita')
-    ]
+    # Estrai tutte le (data, codice_stalla) per query batch
+    date_uscita = list({gruppo.get('data_uscita') for gruppo in gruppi_decessi if gruppo.get('data_uscita')})
     
     if not date_uscita:
         return gruppi_decessi
     
-    # Query batch per trovare tutti i gruppi esistenti
+    # Query batch per trovare tutti i gruppi esistenti con quelle date
     existing_gruppi = db.query(GruppoDecessi).filter(
         GruppoDecessi.azienda_id == azienda_id,
         GruppoDecessi.data_uscita.in_(date_uscita),
         GruppoDecessi.deleted_at.is_(None)
     ).all()
     
-    # Crea un set di date esistenti per lookup veloce
-    existing_dates = {g.data_uscita for g in existing_gruppi}
+    # Set di (data_uscita, codice_stalla) esistenti per lookup veloce
+    # Per record vecchi senza codice_stalla si usa "_default"
+    existing_keys = {
+        (g.data_uscita, (g.codice_stalla_decesso or "").strip() or "_default")
+        for g in existing_gruppi
+    }
     
-    # Filtra i gruppi
-    gruppi_filtered = [
-        gruppo
-        for gruppo in gruppi_decessi
-        if gruppo.get('data_uscita') not in existing_dates
-    ]
+    # Filtra i gruppi: escludi se (data, codice_stalla) già esistente
+    gruppi_filtered = []
+    for gruppo in gruppi_decessi:
+        data = gruppo.get('data_uscita')
+        if not data:
+            gruppi_filtered.append(gruppo)
+            continue
+        codice_stalla = (gruppo.get('codice_stalla_decesso') or "").strip() or "_default"
+        if (data, codice_stalla) not in existing_keys:
+            gruppi_filtered.append(gruppo)
     
     return gruppi_filtered
 

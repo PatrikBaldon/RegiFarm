@@ -16,6 +16,9 @@ class GruppoDecessi(Base):
     # Data uscita (per raggruppamento)
     data_uscita = Column(Date, nullable=False, index=True)
     
+    # Codice stalla decesso (per distinguere più gruppi nello stesso giorno in stalle diverse)
+    codice_stalla_decesso = Column(String(50), nullable=True, index=True)
+    
     # Certificato smaltimento
     numero_certificato_smaltimento = Column(String(100), nullable=True, index=True)
     

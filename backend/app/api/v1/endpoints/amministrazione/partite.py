@@ -4,6 +4,7 @@ Partite Animali e Sincronizzazione Anagrafe endpoints
 from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File
 from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 from typing import List, Optional, Dict
 from datetime import datetime, date
 from decimal import Decimal
@@ -1052,11 +1053,34 @@ async def delete_partita_movimento_finanziario(
 
 @router.delete("/partite/{partita_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_partita(partita_id: int, db: Session = Depends(get_db)):
-    """Soft delete a partita"""
+    """
+    Soft delete a partita.
+    Rimuove correttamente tutti i collegamenti prima del soft delete:
+    - PartitaAnimaleAnimale (link partita-animale)
+    - PNMovimento.partita_id (riferimento dai movimenti prima nota)
+    - PartitaMovimentoFinanziario (cascade delete-orphan, ma esplicitiamo per chiarezza)
+    Così il numero_partita può essere riutilizzato (indice UNIQUE parziale WHERE deleted_at IS NULL).
+    """
     db_partita = db.query(PartitaAnimale).filter(PartitaAnimale.id == partita_id).first()
     if not db_partita:
         raise HTTPException(status_code=404, detail="Partita non trovata")
-    
+
+    # 1. Rimuovi collegamenti partita-animale (PartitaAnimaleAnimale)
+    db.query(PartitaAnimaleAnimale).filter(
+        PartitaAnimaleAnimale.partita_animale_id == partita_id
+    ).delete(synchronize_session=False)
+
+    # 2. Scollega movimenti prima nota dalla partita (SET NULL)
+    db.query(PNMovimento).filter(PNMovimento.partita_id == partita_id).update(
+        {PNMovimento.partita_id: None}, synchronize_session=False
+    )
+
+    # 3. Elimina movimenti finanziari collegati alla partita
+    db.query(PartitaMovimentoFinanziario).filter(
+        PartitaMovimentoFinanziario.partita_id == partita_id
+    ).delete(synchronize_session=False)
+
+    # 4. Soft delete della partita
     db_partita.deleted_at = datetime.utcnow()
     db.commit()
     return None
@@ -1569,30 +1593,29 @@ async def confirm_partita_anagrafe(
         
         db.flush()  # Salva le modifiche
     else:
-        # Genera numero partita con numero progressivo giornaliero
+        # Genera numero partita con numero progressivo per (data, tipo, codice_stalla)
+        # Include codice_stalla nel conteggio per evitare collisioni tra partite verso stalle diverse
         tipo_prefix = "ING" if tipo == 'ingresso' else "USC"
         data_str_format = data.strftime('%Y%m%d')
-        
-        # Conta quante partite esistono già per questo giorno e tipo
         tipo_partita = TipoPartita.INGRESSO if tipo == 'ingresso' else TipoPartita.USCITA
+
         count = db.query(func.count(PartitaAnimale.id)).filter(
             PartitaAnimale.data == data,
             PartitaAnimale.tipo == tipo_partita,
+            PartitaAnimale.codice_stalla == codice_stalla,
             PartitaAnimale.deleted_at.is_(None)
         ).scalar() or 0
-        
-        # Genera numero progressivo a 3 cifre (001, 002, ecc.)
+
         numero_progressivo = f"{(count + 1):03d}"
         numero_partita = f"{tipo_prefix}-{data_str_format}-{codice_stalla}-{numero_progressivo}"
-        
-        # Crea la partita
+
         db_partita = PartitaAnimale(
             azienda_id=azienda_id,
             tipo=TipoPartita.INGRESSO if tipo == 'ingresso' else TipoPartita.USCITA,
             data=data,
             numero_partita=numero_partita,
-            codice_stalla=codice_stalla,  # Provenienza/destinazione esterna
-            codice_stalla_azienda=codice_stalla_azienda,  # Codice stalla dell'allevamento dell'utente
+            codice_stalla=codice_stalla,
+            codice_stalla_azienda=codice_stalla_azienda,
             numero_capi=numero_capi,
             peso_totale=peso_totale_decimal,
             peso_medio=peso_medio,
@@ -1612,10 +1635,19 @@ async def confirm_partita_anagrafe(
             fattura_emessa_id=fattura_emessa_id,
             pesi_individuali=serialized_pesi_individuali,
         )
-        
+
         db.add(db_partita)
-        db.flush()  # Per ottenere l'ID
-    
+        try:
+            db.flush()
+        except IntegrityError as e:
+            err_msg = str(e.orig) if hasattr(e, 'orig') else str(e)
+            if "numero_partita" in err_msg or "UniqueViolation" in err_msg:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Questa partita risulta già confermata. Ricarica la pagina per aggiornare l'elenco."
+                ) from e
+            raise
+
     # Aggiorna o crea gli animali
     animali_aggiornati = 0
     animali_non_trovati = []
@@ -1948,6 +1980,7 @@ async def confirm_gruppo_decessi_anagrafe(
     # Estrai dati dalla richiesta
     azienda_id = gruppo_confirm.azienda_id
     data_uscita_str = gruppo_confirm.data_uscita
+    codice_stalla_decesso = (gruppo_confirm.codice_stalla_decesso or "").strip() or None
     numero_certificato_smaltimento = gruppo_confirm.numero_certificato_smaltimento
     fattura_smaltimento_id = gruppo_confirm.fattura_smaltimento_id
     valore_economico_totale = gruppo_confirm.valore_economico_totale
@@ -1965,23 +1998,32 @@ async def confirm_gruppo_decessi_anagrafe(
     else:
         data_uscita = data_uscita_str
     
-    # Verifica se esiste già un gruppo per questa data e azienda
-    existing_gruppo = db.query(GruppoDecessi).filter(
+    # Verifica se esiste già un gruppo per questa data, codice_stalla e azienda
+    # (più gruppi stesso giorno in stalle diverse sono consentiti)
+    existing_q = db.query(GruppoDecessi).filter(
         GruppoDecessi.azienda_id == azienda_id,
         GruppoDecessi.data_uscita == data_uscita,
         GruppoDecessi.deleted_at.is_(None)
-    ).first()
+    )
+    if codice_stalla_decesso:
+        existing_q = existing_q.filter(GruppoDecessi.codice_stalla_decesso == codice_stalla_decesso)
+    else:
+        existing_q = existing_q.filter(
+            (GruppoDecessi.codice_stalla_decesso.is_(None)) | (GruppoDecessi.codice_stalla_decesso == "")
+        )
+    existing_gruppo = existing_q.first()
     
     if existing_gruppo:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Gruppo decessi già esistente per questa data"
+            detail="Gruppo decessi già esistente per questa data e stalla"
         )
     
     # Crea il gruppo decessi
     db_gruppo = GruppoDecessi(
         azienda_id=azienda_id,
         data_uscita=data_uscita,
+        codice_stalla_decesso=codice_stalla_decesso,
         numero_certificato_smaltimento=numero_certificato_smaltimento,
         fattura_smaltimento_id=fattura_smaltimento_id,
         valore_economico_totale=Decimal(str(valore_economico_totale)) if valore_economico_totale else None,

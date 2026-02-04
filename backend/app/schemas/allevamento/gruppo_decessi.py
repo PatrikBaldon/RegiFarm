@@ -8,6 +8,7 @@ from decimal import Decimal
 class GruppoDecessiBase(BaseModel):
     azienda_id: int = Field(..., description="ID azienda")
     data_uscita: date = Field(..., description="Data uscita (per raggruppamento)")
+    codice_stalla_decesso: Optional[str] = Field(None, max_length=50, description="Codice stalla decesso (per distinguere più gruppi stesso giorno)")
     numero_certificato_smaltimento: Optional[str] = Field(None, max_length=100, description="Numero certificato smaltimento")
     fattura_smaltimento_id: Optional[int] = Field(None, description="ID fattura smaltimento (opzionale)")
     valore_economico_totale: Optional[Decimal] = Field(None, description="Valore economico totale gruppo")
@@ -47,6 +48,7 @@ class GruppoDecessiConfirm(BaseModel):
     """Schema per conferma gruppo decessi da anagrafe"""
     azienda_id: int
     data_uscita: str  # ISO format o YYYY-MM-DD
+    codice_stalla_decesso: Optional[str] = Field(None, max_length=50)
     numero_certificato_smaltimento: Optional[str] = Field(None, max_length=100)
     fattura_smaltimento_id: Optional[int] = None
     valore_economico_totale: Optional[Decimal] = None

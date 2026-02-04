@@ -421,6 +421,7 @@ const PartiteAnagrafeModal = ({ isOpen, onClose, partite, aziendaId, onConfirm }
         const gruppoData = {
           azienda_id: currentPartita.azienda_id || aziendaId,
           data_uscita: dataUscitaValue,
+          codice_stalla_decesso: currentPartita.codice_stalla_decesso || null,
           numero_certificato_smaltimento: numeroCertificatoSmaltimento || null,
           fattura_smaltimento_id: fatturaSmaltimentoValue,
           valore_economico_totale: valoreEconomicoValue,
