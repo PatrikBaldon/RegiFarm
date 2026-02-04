@@ -1242,7 +1242,8 @@ async def confirm_partita_anagrafe(
     is_trasferimento_interno = partita_data.is_trasferimento_interno
     codici_capi = partita_data.codici_capi or []
     motivo = partita_data.motivo
-    # Normalizza il codice motivo '02' a 'D' per i decessi (mantiene coerenza nei dati salvati)
+    # Normalizza i codici motivo decesso ('02', '2') a 'D' (mantiene coerenza nei dati salvati)
+    # L'anagrafe è passata da D a 2, supportiamo entrambi
     if motivo and str(motivo).strip().upper() in ('02', '2'):
         motivo = 'D'
     numero_modello = partita_data.numero_modello
@@ -1778,7 +1779,7 @@ async def confirm_partita_anagrafe(
                                 animale.stato = 'venduto'
                             elif motivo in ('M', 'm'):  # Macellazione
                                 animale.stato = 'macellato'
-                            elif motivo in ('D', 'd', '02'):  # Deceduto (D o 02)
+                            elif motivo in ('D', 'd', '02', '2'):  # Deceduto (D, 02 o 2 - codici anagrafe)
                                 animale.stato = 'deceduto'
                             else:
                                 # Per altre uscite esterne (non vendita, non macellazione, non deceduto), usa 'venduto' come default
@@ -2059,7 +2060,7 @@ async def confirm_gruppo_decessi_anagrafe(
                 # Aggiorna lo stato dell'animale e tutti i campi disponibili
                 animale.stato = 'deceduto'
                 animale.data_uscita = data_uscita
-                animale.motivo_uscita = 'D'  # Decesso (usiamo 'D' come standard interno, ma accettiamo anche '02' dai file)
+                animale.motivo_uscita = 'D'  # Decesso (standard interno; anagrafe usa D, 02 o 2)
                 animale.data_ultima_pesata = data_uscita  # Aggiorna con data di decesso
                 
                 # Aggiorna tutti i campi di uscita disponibili dal file

@@ -371,9 +371,14 @@ def group_uscite(columns: List[str], rows: List[Dict[str, Any]], azienda_codice:
     return partite
 
 
+# Codici MOTIVO_USCITA per decesso: D (storico), 02, 2 (anagrafe attuale)
+_CODICI_MOTIVO_DECESSO = ("D", "02", "2")
+
+
 def group_decessi(columns: List[str], rows: List[Dict[str, Any]], azienda_codice: str, azienda_id: int, db: Session, animali_esistenti_map: Optional[dict] = None) -> List[Dict]:
     """
-    Raggruppa decessi (MOTIVO_USCITA = 'D' o '02') per data di uscita.
+    Raggruppa decessi (MOTIVO_USCITA = 'D', '02' o '2') per data di uscita.
+    L'anagrafe è passata da D a 2: supportiamo entrambi i codici.
     Funziona con lista di dict (senza pandas).
     """
     def is_decesso(row: Dict) -> bool:
@@ -381,7 +386,7 @@ def group_decessi(columns: List[str], rows: List[Dict[str, Any]], azienda_codice
         if not m:
             return False
         m = m.strip().upper()
-        return m in ("D", "02", "2")
+        return m in _CODICI_MOTIVO_DECESSO
     decessi = [
         r for r in rows
         if is_decesso(r) and _row_val(r, "DATA_USCITA_STALLA") and _row_val(r, "CODICE_CAPO")

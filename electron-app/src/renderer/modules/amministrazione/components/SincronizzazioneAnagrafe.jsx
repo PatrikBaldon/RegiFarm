@@ -39,7 +39,8 @@ const CODICI_MOTIVO_USCITA = {
   'V': 'Vendita',  // Usato nel backend per impostare stato 'venduto'
   'M': 'Macellazione',  // Usato nel backend per impostare stato 'macellato' (nota: nei file Excel può essere anche 'K')
   'D': 'Decesso',  // Usato nel backend per decessi (MOTIVO_USCITA = 'D')
-  '02': 'Morte/Decesso',  // Codice numerico recente per decessi (MOTIVO_USCITA = '02')
+  '02': 'Morte/Decesso',  // Codice numerico per decessi (MOTIVO_USCITA = '02')
+  '2': 'Morte/Decesso',   // Codice anagrafe attuale per decessi (sostituisce D)
   'K': 'Macellazione',  // Alternativa comune nei file Excel
   'T': 'Trasferimento',
   'E': 'Esportazione',
@@ -2085,7 +2086,7 @@ const SincronizzazioneAnagrafe = () => {
                     placeholder={
                       tipoPartita === 'ingresso'
                         ? 'A (Acquisto), N (Nascita), T (Trasferimento), I (Importazione), R (Rientro)'
-                        : 'V (Vendita), K/M (Macellazione), D/02 (Decesso), T (Trasferimento), E (Esportazione), F (Fiera)'
+                        : 'V (Vendita), K/M (Macellazione), D/02/2 (Decesso), T (Trasferimento), E (Esportazione), F (Fiera)'
                     }
                     maxLength="2"
                     style={{ textTransform: 'uppercase' }}
@@ -2094,7 +2095,7 @@ const SincronizzazioneAnagrafe = () => {
                     {tipoPartita === 'ingresso' ? (
                       <>Codici ingresso: A=Acquisto, N=Nascita, T=Trasferimento, I=Importazione, R=Rientro</>
                     ) : (
-                      <>Codici uscita: V=Vendita, K/M=Macellazione, D/02=Decesso/Morte, T=Trasferimento, E=Esportazione, F=Fiera</>
+                      <>Codici uscita: V=Vendita, K/M=Macellazione, D/02/2=Decesso/Morte, T=Trasferimento, E=Esportazione, F=Fiera</>
                     )}
                   </small>
                 </div>
