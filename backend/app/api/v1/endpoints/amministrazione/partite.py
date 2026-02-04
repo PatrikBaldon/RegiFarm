@@ -1054,12 +1054,9 @@ async def delete_partita_movimento_finanziario(
 @router.delete("/partite/{partita_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_partita(partita_id: int, db: Session = Depends(get_db)):
     """
-    Soft delete a partita.
-    Rimuove correttamente tutti i collegamenti prima del soft delete:
-    - PartitaAnimaleAnimale (link partita-animale)
-    - PNMovimento.partita_id (riferimento dai movimenti prima nota)
-    - PartitaMovimentoFinanziario (cascade delete-orphan, ma esplicitiamo per chiarezza)
-    Così il numero_partita può essere riutilizzato (indice UNIQUE parziale WHERE deleted_at IS NULL).
+    Eliminazione definitiva (hard delete) di una partita.
+    Rimuove tutti i collegamenti e il record come se non fosse mai stato inserito.
+    Una partita reinserita sarà trattata come nuovo inserimento.
     """
     db_partita = db.query(PartitaAnimale).filter(PartitaAnimale.id == partita_id).first()
     if not db_partita:
@@ -1080,8 +1077,8 @@ async def delete_partita(partita_id: int, db: Session = Depends(get_db)):
         PartitaMovimentoFinanziario.partita_id == partita_id
     ).delete(synchronize_session=False)
 
-    # 4. Soft delete della partita
-    db_partita.deleted_at = datetime.utcnow()
+    # 4. Eliminazione definitiva della partita (hard delete)
+    db.delete(db_partita)
     db.commit()
     return None
 

@@ -873,8 +873,26 @@ class LocalDatabase {
     return this.update('partite_animali', id, updates);
   }
 
+  /**
+   * Eliminazione definitiva (hard delete) della partita: viene rimossa dal DB locale
+   * e registrata in _sync_log come pending delete per la push verso il server.
+   * Reinserendo la stessa partita sarà trattata come nuovo inserimento.
+   */
+  hardDeletePartita(id) {
+    if (!this.isAvailable()) return false;
+    try {
+      this._logSync('partite_animali', 'delete', id, {});
+      this.db.prepare('DELETE FROM partite_animali_animali WHERE partita_animale_id = ?').run(id);
+      this.db.prepare('DELETE FROM partite_animali WHERE id = ?').run(id);
+      return true;
+    } catch (error) {
+      console.error('[LocalDb] Errore hardDeletePartita:', error);
+      return false;
+    }
+  }
+
   deletePartita(id) {
-    return this.delete('partite_animali', id);
+    return this.hardDeletePartita(id);
   }
 
   getPartitaAnimali(partitaId) {
@@ -1809,9 +1827,18 @@ class LocalDatabase {
 
     try {
       if (table) {
-        return this.db.prepare(
+        const fromTable = this.db.prepare(
           `SELECT * FROM ${table} WHERE sync_status = 'pending'`
         ).all();
+        // Per partite_animali includi anche le delete già applicate localmente (solo in _sync_log)
+        if (table === 'partite_animali') {
+          const pendingDeletes = this.db.prepare(
+            `SELECT record_id as id FROM _sync_log 
+             WHERE table_name = 'partite_animali' AND operation = 'delete' AND status = 'pending'`
+          ).all();
+          return [...fromTable, ...pendingDeletes];
+        }
+        return fromTable;
       }
 
       // Ottieni da tutte le tabelle

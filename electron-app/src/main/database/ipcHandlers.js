@@ -96,10 +96,13 @@ function registerDatabaseHandlers() {
   });
 
   /**
-   * Soft Delete
+   * Delete: per partite_animali è hard delete (eliminazione definitiva), per le altre tabelle soft delete.
    */
   ipcMain.handle('db:delete', async (event, { table, id }) => {
     try {
+      if (table === 'partite_animali') {
+        return localDb.hardDeletePartita(id);
+      }
       return localDb.softDelete(table, id);
     } catch (error) {
       console.error(`[IPC] Errore db:delete ${table}:`, error);

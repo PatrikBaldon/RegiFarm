@@ -34,6 +34,8 @@ from app.models.allevamento.azienda import Azienda
 from app.models.amministrazione.fornitore import Fornitore
 from app.models.amministrazione.fattura_amministrazione import FatturaAmministrazione
 from app.models.amministrazione.partita_animale import PartitaAnimale
+from app.models.amministrazione.partita_animale_animale import PartitaAnimaleAnimale
+from app.models.amministrazione.partita_animale_movimento_finanziario import PartitaMovimentoFinanziario
 from app.models.amministrazione.attrezzatura import Attrezzatura
 from app.models.amministrazione.assicurazione_aziendale import AssicurazioneAziendale
 from app.models.amministrazione.contratto_soccida import ContrattoSoccida
@@ -519,9 +521,36 @@ async def sync_push(
                     errors += 1
             
             elif change.operation == 'delete':
-                # Soft delete
                 record = db.query(model).filter(model.id == change.id).first()
-                if record and hasattr(record, 'deleted_at'):
+                if not record:
+                    results.append(SyncPushResult(
+                        table=change.table,
+                        id=change.id,
+                        success=False,
+                        error=f"Record {change.id} non trovato"
+                    ))
+                    errors += 1
+                elif change.table == 'partite_animali':
+                    # Eliminazione definitiva (hard delete) per partite: come da richiesta,
+                    # la partita viene rimossa completamente e può essere reinserita come nuova.
+                    partita_id = change.id
+                    db.query(PartitaAnimaleAnimale).filter(
+                        PartitaAnimaleAnimale.partita_animale_id == partita_id
+                    ).delete(synchronize_session=False)
+                    db.query(PNMovimento).filter(PNMovimento.partita_id == partita_id).update(
+                        {PNMovimento.partita_id: None}, synchronize_session=False
+                    )
+                    db.query(PartitaMovimentoFinanziario).filter(
+                        PartitaMovimentoFinanziario.partita_id == partita_id
+                    ).delete(synchronize_session=False)
+                    db.delete(record)
+                    results.append(SyncPushResult(
+                        table=change.table,
+                        id=change.id,
+                        success=True
+                    ))
+                elif hasattr(record, 'deleted_at'):
+                    # Soft delete per le altre tabelle con deleted_at
                     record.deleted_at = datetime.utcnow()
                     results.append(SyncPushResult(
                         table=change.table,
@@ -533,7 +562,7 @@ async def sync_push(
                         table=change.table,
                         id=change.id,
                         success=False,
-                        error=f"Record {change.id} non trovato o non eliminabile"
+                        error=f"Record {change.id} non eliminabile"
                     ))
                     errors += 1
         
