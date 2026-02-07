@@ -35,6 +35,9 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
+      - name: Clean frontend output and webpack cache
+        run: npx rimraf electron-app/output node_modules/.cache/webpack
+
       - name: Create .env for build
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -80,6 +83,9 @@ jobs:
 
       - name: Install npm dependencies
         run: npm ci
+
+      - name: Clean frontend output and webpack cache
+        run: npx rimraf electron-app/output node_modules/.cache/webpack
 
       - name: Create .env for build
         env:
