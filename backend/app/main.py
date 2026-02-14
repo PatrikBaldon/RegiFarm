@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import OperationalError
 import logging
+import traceback
 
 from app.api.v1.endpoints import alimentazione
 from app.api.v1.endpoints import allevamento, aziende, sanitario
@@ -103,6 +104,21 @@ async def database_error_handler(request: Request, exc: OperationalError):
             "error": error_msg
         }
     )
+
+
+# Global exception handler per errori 500 - logga traceback completo per debug
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exc: Exception):
+    """Logga eccezioni non gestite e restituisce 500 con messaggio generico"""
+    tb = traceback.format_exc()
+    logger.error(f"Unhandled exception: {exc}\n{tb}")
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "detail": "Errore interno del server. Contatta il supporto se il problema persiste.",
+        }
+    )
+
 
 # Include routers
 app.include_router(aziende.router, prefix="/api/v1")

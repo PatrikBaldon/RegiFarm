@@ -497,6 +497,189 @@ async def report_allevamento(
     )
 
 
+@router.get("/report/allevamento/per-partita")
+async def report_allevamento_per_partita(
+    azienda_id: Optional[int] = Query(None, description="ID azienda"),
+    contratto_soccida_id: Optional[int] = Query(None, description="ID contratto soccida"),
+    data_uscita: Optional[date] = Query(None, description="Data di uscita (per singolo giorno)"),
+    data_uscita_da: Optional[date] = Query(None, description="Data inizio intervallo uscite"),
+    data_uscita_a: Optional[date] = Query(None, description="Data fine intervallo uscite"),
+    partita_ids: Optional[str] = Query(None, description="Lista ID partite di ingresso separati da virgola (report per partite selezionate)"),
+    tipo_gestione_acconti: Optional[str] = Query(None),
+    acconto_manuale: Optional[float] = Query(None),
+    movimenti_pn_ids: Optional[str] = Query(None),
+    fatture_acconto_selezionate: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+):
+    """Genera report allevamento con una pagina per ogni partita di ingresso (stesso layout). Può essere filtrato per data di uscita oppure per partite selezionate (partita_ids)."""
+    # Modalità "per partite selezionate": partita_ids fornito
+    if partita_ids:
+        try:
+            ids_list = [int(x.strip()) for x in partita_ids.split(",") if x.strip()]
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="partita_ids deve essere una lista di numeri separati da virgola",
+            )
+        if not ids_list:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Seleziona almeno una partita",
+            )
+        if not azienda_id and not contratto_soccida_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Per il report per partite selezionate serve azienda_id o contratto_soccida_id",
+            )
+
+        from app.services.amministrazione.report_allevamento_service import (
+            calculate_riepilogo_per_partita_by_ids,
+            calculate_riepilogo_valore_per_partite_ids,
+        )
+        from app.utils.pdf_generator import generate_report_allevamento_per_partita_pdf
+        from app.utils.pdf_layout import branding_from_azienda
+
+        riepilogo = calculate_riepilogo_per_partita_by_ids(
+            db=db,
+            partita_ids=ids_list,
+            azienda_id=azienda_id,
+            contratto_soccida_id=contratto_soccida_id,
+        )
+        if not riepilogo:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Nessuna partita trovata per gli ID indicati",
+            )
+        valore_riepilogo = calculate_riepilogo_valore_per_partite_ids(
+            db=db,
+            partita_ids=ids_list,
+            azienda_id=azienda_id,
+            contratto_soccida_id=contratto_soccida_id,
+        )
+        report_data = {
+            "periodo_label": "Partite selezionate",
+            "riepilogo_per_partita": riepilogo,
+            "riepilogo_proprieta": valore_riepilogo.get("riepilogo_proprieta", {}),
+            "riepilogo_soccida": valore_riepilogo.get("riepilogo_soccida", {}),
+            "gestione_acconti": {},
+            "ha_acconti": False,
+        }
+        branding = None
+        if azienda_id:
+            azienda = db.query(Azienda).filter(Azienda.id == azienda_id).first()
+            if azienda:
+                branding = branding_from_azienda(azienda)
+        elif contratto_soccida_id:
+            contratto = db.query(ContrattoSoccida).filter(ContrattoSoccida.id == contratto_soccida_id).first()
+            if contratto and contratto.azienda_id:
+                azienda = db.query(Azienda).filter(Azienda.id == contratto.azienda_id).first()
+                if azienda:
+                    branding = branding_from_azienda(azienda)
+        pdf_buffer = generate_report_allevamento_per_partita_pdf(report_data, branding=branding)
+        filename = "report_allevamento_per_partite_selezionate.pdf"
+        pdf_buffer.seek(0)
+        return StreamingResponse(
+            pdf_buffer,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
+        )
+
+    # Modalità "per data di uscita" (come prima)
+    if not azienda_id and not contratto_soccida_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Deve essere specificato azienda_id o contratto_soccida_id"
+        )
+    if not data_uscita and not (data_uscita_da and data_uscita_a):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Specificare una data di uscita oppure un intervallo (data_uscita_da + data_uscita_a)"
+        )
+    if data_uscita and (data_uscita_da or data_uscita_a):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Non è possibile combinare data_uscita singola con l'intervallo di date"
+        )
+
+    acconti_kwargs = {}
+    if tipo_gestione_acconti:
+        try:
+            tipo_enum = TipoGestioneAcconti(tipo_gestione_acconti)
+            acconto_manuale_decimal = Decimal(str(acconto_manuale)) if acconto_manuale is not None else None
+            movimenti_ids_list = [int(x.strip()) for x in movimenti_pn_ids.split(',')] if movimenti_pn_ids else None
+            fatture_list = None
+            if fatture_acconto_selezionate:
+                import json
+                fatture_data = json.loads(fatture_acconto_selezionate)
+                fatture_list = [FatturaAccontoSelezionata(**f) for f in fatture_data]
+            acconti_params = ReportAllevamentoAccontiParams(
+                tipo_gestione_acconti=tipo_enum,
+                acconto_manuale=acconto_manuale_decimal,
+                movimenti_pn_ids=movimenti_ids_list,
+                fatture_acconto_selezionate=fatture_list,
+            )
+            acconti_params.validate()
+            acconti_kwargs = {
+                'tipo_gestione_acconti': acconti_params.tipo_gestione_acconti.value,
+                'acconto_manuale': acconti_params.acconto_manuale,
+                'movimenti_pn_ids': acconti_params.movimenti_pn_ids,
+                'fatture_acconto_selezionate': [
+                    {'fattura_id': f.fattura_id, 'importo_utilizzato': float(f.importo_utilizzato)}
+                    for f in (acconti_params.fatture_acconto_selezionate or [])
+                ] if acconti_params.fatture_acconto_selezionate else None,
+            }
+        except (ValueError, Exception):
+            pass
+
+    report_data = calculate_report_allevamento_data(
+        db=db,
+        data_uscita=data_uscita,
+        data_inizio=data_uscita_da,
+        data_fine=data_uscita_a,
+        azienda_id=azienda_id,
+        contratto_soccida_id=contratto_soccida_id,
+        include_riepilogo_per_partita=True,
+        **acconti_kwargs,
+    )
+
+    if report_data.get('totale_capi', 0) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Nessun animale trovato per il periodo richiesto"
+        )
+
+    from app.utils.pdf_generator import generate_report_allevamento_per_partita_pdf
+    from app.utils.pdf_layout import branding_from_azienda
+
+    branding = None
+    if azienda_id:
+        azienda = db.query(Azienda).filter(Azienda.id == azienda_id).first()
+        if azienda:
+            branding = branding_from_azienda(azienda)
+    elif contratto_soccida_id:
+        contratto = db.query(ContrattoSoccida).filter(ContrattoSoccida.id == contratto_soccida_id).first()
+        if contratto and contratto.azienda_id:
+            azienda = db.query(Azienda).filter(Azienda.id == contratto.azienda_id).first()
+            if azienda:
+                branding = branding_from_azienda(azienda)
+
+    pdf_buffer = generate_report_allevamento_per_partita_pdf(report_data, branding=branding)
+    if data_uscita:
+        filename = f"report_allevamento_per_partita_uscita_del_{data_uscita.strftime('%Y-%m-%d')}.pdf"
+    else:
+        filename = (
+            f"report_allevamento_per_partita_dal_{data_uscita_da.strftime('%Y-%m-%d')}"
+            f"_al_{data_uscita_a.strftime('%Y-%m-%d')}.pdf"
+        )
+    pdf_buffer.seek(0)
+
+    return StreamingResponse(
+        pdf_buffer,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
+
+
 @router.get("/report/allevamento/fatture-acconto/{contratto_id}")
 async def get_fatture_acconto_contratto(
     contratto_id: int,

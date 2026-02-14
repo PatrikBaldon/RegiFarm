@@ -232,6 +232,13 @@ export const amministrazioneService = {
       params,
       { responseType: 'blob' }
     ),
+
+  getReportAllevamentoPerPartita: (params = {}) =>
+    api.get(
+      '/amministrazione/report/allevamento/per-partita',
+      params,
+      { responseType: 'blob' }
+    ),
   
   // Report Prima Nota Dare/Avere
   getContropartitePrimaNota: (aziendaId) =>

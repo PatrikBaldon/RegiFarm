@@ -114,9 +114,11 @@ def _detach_pn_movimento(db: Session, pn_movimento_id: Optional[int]) -> None:
 async def get_partite(
     tipo: Optional[str] = None,
     azienda_id: Optional[int] = None,
+    contratto_soccida_id: Optional[int] = None,
     codice_stalla: Optional[str] = None,
     data_da: Optional[date] = None,
     data_a: Optional[date] = None,
+    solo_esterne: Optional[bool] = Query(None, description="Se true, solo partite dall'esterno (esclude trasferimenti interni)"),
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db)
@@ -131,6 +133,9 @@ async def get_partite(
         .filter(PartitaAnimale.deleted_at.is_(None))
     )
     
+    if solo_esterne is True:
+        query = query.filter(PartitaAnimale.is_trasferimento_interno == False)
+    
     if tipo:
         # Se filtriamo per 'ingresso', includiamo anche le partite senza tipo
         # (potrebbero essere partite appena create che non hanno ancora il tipo impostato)
@@ -142,6 +147,8 @@ async def get_partite(
             query = query.filter(PartitaAnimale.tipo == tipo)
     if azienda_id:
         query = query.filter(PartitaAnimale.azienda_id == azienda_id)
+    if contratto_soccida_id is not None:
+        query = query.filter(PartitaAnimale.contratto_soccida_id == contratto_soccida_id)
     if codice_stalla:
         query = query.filter(PartitaAnimale.codice_stalla == codice_stalla)
     if data_da:

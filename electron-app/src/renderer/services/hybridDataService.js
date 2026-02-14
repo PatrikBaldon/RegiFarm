@@ -1357,6 +1357,10 @@ class HybridDataService {
     return api.get('/amministrazione/report/allevamento', params, { responseType: 'blob' });
   }
 
+  async getReportAllevamentoPerPartita(params = {}) {
+    return api.get('/amministrazione/report/allevamento/per-partita', params, { responseType: 'blob' });
+  }
+
   /**
    * Report prima nota - SEMPRE ONLINE
    */

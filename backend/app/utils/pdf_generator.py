@@ -1209,6 +1209,347 @@ def generate_report_allevamento_pdf(report_data: dict, branding=None):
     return buffer
 
 
+def generate_report_allevamento_per_partita_pdf(report_data: dict, branding=None):
+    """
+    Genera PDF del report allevamento con una pagina/sezione per ogni partita di ingresso.
+    Stesso identico layout per ogni partita: status (arrivati/usciti/deceduti/presenti),
+    dettaglio auricolari (presenti, usciti, deceduti), peso arrivo, acconto, peso uscita, destinazioni.
+    """
+    from datetime import date as date_type
+
+    buffer = BytesIO()
+    doc, branding_config = create_document(
+        buffer,
+        branding=branding,
+        doc_kwargs={"pagesize": A4},
+    )
+    periodo_label = report_data.get("periodo_label") or report_data.get("data_uscita", "N/A")
+    branding_config.setdefault("report_title", "Report Allevamento - Riepilogo per partita")
+    branding_config.setdefault("report_subtitle", f"Periodo uscita: {periodo_label}")
+
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        "CustomTitle",
+        parent=styles["Heading1"],
+        fontSize=18,
+        textColor=colors.black,
+        spaceAfter=12,
+        alignment=TA_CENTER,
+    )
+    heading_style = ParagraphStyle(
+        "CustomHeading",
+        parent=styles["Heading2"],
+        fontSize=14,
+        textColor=colors.HexColor("#333333"),
+        spaceAfter=8,
+        spaceBefore=12,
+    )
+    subheading_style = ParagraphStyle(
+        "CustomSubHeading",
+        parent=styles["Heading3"],
+        fontSize=12,
+        textColor=colors.HexColor("#555555"),
+        spaceAfter=6,
+        spaceBefore=8,
+    )
+
+    table_header_color = colors.HexColor("#2d5016")
+    table_bg = colors.HexColor("#f9f9f9")
+    table_grid = colors.HexColor("#cccccc")
+    larghezza_totale = 190 * mm
+
+    story = []
+    story.append(Paragraph("REPORT ALLEVAMENTO - RIEPILOGO PER PARTITA DI INGRESSO", title_style))
+    story.append(Paragraph(f"Periodo uscita: {periodo_label}", styles["Normal"]))
+    story.append(Spacer(1, 8 * mm))
+
+    riepilogo = report_data.get("riepilogo_per_partita") or []
+
+    # ---------- PRIMA PAGINA: tabella unica (dati + conteggio + valore finale, senza dettaglio contratto) ----------
+    if riepilogo:
+        tot_capi_entrati = sum(p.get("numero_capi_arrivati", 0) or 0 for p in riepilogo)
+        tot_capi_usciti = sum(p.get("numero_usciti", 0) or 0 for p in riepilogo)
+        tot_capi_deceduti = sum(p.get("numero_deceduti", 0) or 0 for p in riepilogo)
+        tot_peso_ing = sum(p.get("peso_arrivo_totale", 0) or 0 for p in riepilogo)
+        tot_peso_iniziale = sum(p.get("peso_arrivo_totale_iniziale", 0) or 0 for p in riepilogo)
+        tot_peso_deceduti = sum(p.get("peso_deceduti", 0) or 0 for p in riepilogo)
+        tot_peso_usc = sum(p.get("peso_uscita_totale", 0) or 0 for p in riepilogo)
+        tot_valore_ing = sum(p.get("valore_ingresso_totale", 0) or 0 for p in riepilogo)
+        tot_valore_usc = sum(p.get("valore_uscita_totale", 0) or 0 for p in riepilogo)
+        tot_acconto = sum(p.get("acconto_percepito", 0) or 0 for p in riepilogo)
+
+        riepilogo_proprieta = report_data.get("riepilogo_proprieta", {})
+        riepilogo_soccida = report_data.get("riepilogo_soccida", {})
+        has_proprieta = (riepilogo_proprieta.get("numero_capi") or 0) > 0
+        has_soccida = (riepilogo_soccida.get("numero_capi") or 0) > 0
+        conteggio_valore = 0.0
+        if has_proprieta:
+            conteggio_valore = float(riepilogo_proprieta.get("differenza_valore", 0) or 0)
+        elif has_soccida:
+            conteggio_valore = float(riepilogo_soccida.get("valore_totale", 0) or 0)
+        valore_finale = conteggio_valore - tot_acconto
+        capi_con_peso_ing = tot_capi_entrati - tot_capi_deceduti
+
+        # Operazioni su pesi e differenza peso
+        dettaglio_soccida = riepilogo_soccida.get("dettaglio_contratti", [])
+        # Peso ingresso: peso totale iniziale partite − peso capi deceduti
+        peso_ingresso_cell = f"Peso totale iniziale: {tot_peso_iniziale:.2f} kg − Peso deceduti: {tot_peso_deceduti:.2f} kg = {tot_peso_ing:.2f} kg"
+        peso_uscita_cell = f"{tot_peso_usc:.2f} kg"
+        if has_soccida and dettaglio_soccida:
+            orig_arrivo = sum(float(c.get("peso_arrivo_originale_totale", 0) or 0) for c in dettaglio_soccida)
+            orig_uscita = sum(float(c.get("peso_uscita_originale_totale", 0) or 0) for c in dettaglio_soccida)
+            net_arrivo = float(riepilogo_soccida.get("peso_arrivo", 0) or 0)
+            net_uscita = float(riepilogo_soccida.get("peso_uscita", 0) or 0)
+            pct_aggiunta = next((c.get("percentuale_aggiunta_arrivo") for c in dettaglio_soccida if c.get("percentuale_aggiunta_arrivo")), None)
+            pct_sottrazione = next((c.get("percentuale_sottrazione_uscita") for c in dettaglio_soccida if c.get("percentuale_sottrazione_uscita")), None)
+            if pct_aggiunta is not None and abs(orig_arrivo - net_arrivo) > 0.01:
+                op_ing_soccida = f" Soccida (conteggio): {orig_arrivo:.2f} × (1 + {float(pct_aggiunta):.2f}%) = {net_arrivo:.2f} kg"
+                peso_ingresso_cell = peso_ingresso_cell + op_ing_soccida
+            if pct_sottrazione is not None and abs(orig_uscita - net_uscita) > 0.01:
+                op_usc = f"Peso originale: {orig_uscita:.2f} kg × (1 − {float(pct_sottrazione):.2f}%) = {net_uscita:.2f} kg"
+                peso_uscita_cell = f"{op_usc}. Totale partite: {tot_peso_usc:.2f} kg" if has_proprieta else op_usc
+            elif has_soccida and not has_proprieta:
+                peso_uscita_cell = f"{net_uscita:.2f} kg"
+
+        # Riga differenza peso: operazione Peso uscita − Peso arrivo = ...
+        differenza_peso_cell = "—"
+        parts_diff = []
+        if has_proprieta:
+            pa = float(riepilogo_proprieta.get("peso_arrivo", 0) or 0)
+            pu = float(riepilogo_proprieta.get("peso_uscita", 0) or 0)
+            dp = float(riepilogo_proprieta.get("differenza_peso", 0) or 0)
+            parts_diff.append(("Proprietà", pu, pa, dp))
+        if has_soccida:
+            pa = float(riepilogo_soccida.get("peso_arrivo", 0) or 0)
+            pu = float(riepilogo_soccida.get("peso_uscita", 0) or 0)
+            dp = float(riepilogo_soccida.get("differenza_peso", 0) or 0)
+            parts_diff.append(("Soccida", pu, pa, dp))
+        if len(parts_diff) == 1:
+            _, pu, pa, dp = parts_diff[0]
+            differenza_peso_cell = f"Peso uscita − Peso arrivo = {pu:.2f} − {pa:.2f} = {dp:.2f} kg"
+        elif len(parts_diff) > 1:
+            differenza_peso_cell = "Peso uscita − Peso arrivo = " + " | ".join(
+                f"{label}: {pu:.2f} − {pa:.2f} = {dp:.2f} kg" for label, pu, pa, dp in parts_diff
+            )
+
+        # Formula del conteggio (solo operazioni con valori, senza etichette; per soccida prezzo_kg include differenza peso con %)
+        formula_conteggio = "—"
+        if has_proprieta:
+            va = float(riepilogo_proprieta.get("valore_acquisto", 0) or 0)
+            vv = float(riepilogo_proprieta.get("valore_vendita", 0) or 0)
+            dv = float(riepilogo_proprieta.get("differenza_valore", 0) or 0)
+            formula_conteggio = f"€ {vv:.2f} − € {va:.2f} = € {dv:.2f}"
+        elif has_soccida:
+            dettaglio = riepilogo_soccida.get("dettaglio_contratti", [])
+            if dettaglio:
+                c = dettaglio[0]
+                mod = c.get("modalita_remunerazione") or ""
+                vt = float(c.get("valore_totale", 0) or 0)
+                nc = c.get("numero_capi", 0) or 0
+                diff = float(c.get("differenza_peso_totale", 0) or 0)
+                ppk = c.get("prezzo_per_kg")
+                qg = c.get("quota_giornaliera")
+                gg = c.get("giorni_gestione", 0) or 0
+                pct = c.get("percentuale_remunerazione")
+                if mod == "prezzo_kg" and ppk is not None:
+                    # Includi calcolo differenza peso con % contratto (netti già calcolati sopra)
+                    net_arr = float(riepilogo_soccida.get("peso_arrivo", 0) or 0)
+                    net_usc = float(riepilogo_soccida.get("peso_uscita", 0) or 0)
+                    orig_arr = sum(float(x.get("peso_arrivo_originale_totale", 0) or 0) for x in dettaglio_soccida)
+                    orig_usc = sum(float(x.get("peso_uscita_originale_totale", 0) or 0) for x in dettaglio_soccida)
+                    pct_agg = next((x.get("percentuale_aggiunta_arrivo") for x in dettaglio_soccida if x.get("percentuale_aggiunta_arrivo")), None)
+                    pct_sottr = next((x.get("percentuale_sottrazione_uscita") for x in dettaglio_soccida if x.get("percentuale_sottrazione_uscita")), None)
+                    parti = []
+                    if pct_agg is not None and abs(orig_arr - net_arr) > 0.01:
+                        parti.append(f"{orig_arr:.2f} × (1 + {float(pct_agg):.2f}%) = {net_arr:.2f} kg")
+                    if pct_sottr is not None and abs(orig_usc - net_usc) > 0.01:
+                        parti.append(f"{orig_usc:.2f} × (1 − {float(pct_sottr):.2f}%) = {net_usc:.2f} kg")
+                    if parti:
+                        formula_conteggio = ". ".join(parti) + f". {net_usc:.2f} − {net_arr:.2f} = {diff:.2f} kg. {diff:.2f} × € {float(ppk):.2f}/kg = € {vt:.2f}"
+                    else:
+                        formula_conteggio = f"{net_usc:.2f} − {net_arr:.2f} = {diff:.2f} kg. {diff:.2f} × € {float(ppk):.2f}/kg = € {vt:.2f}"
+                elif mod == "quota_giornaliera" and qg is not None:
+                    formula_conteggio = f"{nc} × {gg} × € {float(qg):.2f} = € {vt:.2f}"
+                elif mod == "percentuale" and pct is not None:
+                    formula_conteggio = f"× {float(pct):.2f}% = € {vt:.2f}"
+                elif mod == "ripartizione_utili":
+                    formula_conteggio = f"€ {vt:.2f}"
+                else:
+                    formula_conteggio = f"€ {vt:.2f}"
+                if len(dettaglio) > 1:
+                    vt_tot = float(riepilogo_soccida.get("valore_totale", 0) or 0)
+                    formula_conteggio += f" (+ altri) = € {vt_tot:.2f}"
+            else:
+                formula_conteggio = f"€ {conteggio_valore:.2f}"
+        formula_valore_finale = f"€ {conteggio_valore:.2f} − € {tot_acconto:.2f} = € {valore_finale:.2f}"
+
+        story.append(Paragraph("Riepilogo (partite selezionate)", heading_style))
+        story.append(Spacer(1, 4 * mm))
+        col_w_label = 70 * mm
+        col_w_valore = 120 * mm  # spazio per operazioni con valori
+        small_style = ParagraphStyle("TableSmall", parent=styles["Normal"], fontSize=9)
+        def _cell(s):
+            return Paragraph(s, small_style) if ("Peso " in s or " − " in s) and len(s) > 35 else s
+        totali_data = [
+            ["Voce", "Valore"],
+            ["Capi entrati", str(tot_capi_entrati)],
+            ["Capi usciti", str(tot_capi_usciti)],
+            ["Capi deceduti", str(tot_capi_deceduti)],
+            ["Peso ingresso (kg)", _cell(peso_ingresso_cell)],
+            ["Peso uscita (kg)", _cell(peso_uscita_cell)],
+            ["Differenza peso (kg)", _cell(differenza_peso_cell)],
+            ["Acconto totale (€)", f"€ {tot_acconto:.2f}"],
+            ["Conteggio (€)", Paragraph(formula_conteggio, small_style)],
+            ["Valore finale (€)", Paragraph(formula_valore_finale, small_style)],
+        ]
+        tab_tot = Table(totali_data, colWidths=[col_w_label, col_w_valore])
+        tab_tot.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), table_header_color),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+            ("BACKGROUND", (0, 1), (0, -1), table_header_color),
+            ("TEXTCOLOR", (0, 1), (0, -1), colors.white),
+            ("FONTNAME", (0, 1), (0, -1), "Helvetica-Bold"),
+            ("BACKGROUND", (1, 1), (1, -1), table_bg),
+            ("FONTSIZE", (0, 0), (-1, -1), 9),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+            ("TOPPADDING", (0, 0), (-1, -1), 6),
+            ("ALIGN", (1, 0), (1, -1), "LEFT"),
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("GRID", (0, 0), (-1, -1), 0.5, table_grid),
+        ]))
+        story.append(tab_tot)
+        story.append(PageBreak())
+
+    # ---------- PAGINE SUCCESSIVE: dettaglio per ogni partita ----------
+    for idx, p in enumerate(riepilogo):
+        if idx > 0:
+            story.append(PageBreak())
+
+        # Intestazione partita
+        nome_stalla = (p.get("nome_stalla") or p.get("codice_stalla") or "N/A").strip()
+        data_arrivo = p.get("data_arrivo") or "N/A"
+        if data_arrivo and len(data_arrivo) >= 10:
+            try:
+                data_arrivo = date_type.fromisoformat(data_arrivo[:10]).strftime("%d/%m/%Y")
+            except Exception:
+                pass
+        titolo_partita = f"Partita: {p.get('numero_partita', 'N/A')} - {data_arrivo} - {nome_stalla[:40]}"
+        story.append(Paragraph(titolo_partita, heading_style))
+        story.append(Spacer(1, 6 * mm))
+
+        # Tabella status: Arrivati | Usciti | Deceduti | Presenti
+        status_data = [
+            ["Capi arrivati", "Capi usciti", "Capi deceduti", "Capi presenti"],
+            [
+                str(p.get("numero_capi_arrivati", 0)),
+                str(p.get("numero_usciti", 0)),
+                str(p.get("numero_deceduti", 0)),
+                str(p.get("numero_presenti", 0)),
+            ],
+        ]
+        col_w = larghezza_totale / 4
+        status_table = Table(status_data, colWidths=[col_w] * 4)
+        status_table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), table_header_color),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+            ("FONTSIZE", (0, 0), (-1, -1), 10),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+            ("TOPPADDING", (0, 0), (-1, -1), 6),
+            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+            ("BACKGROUND", (0, 1), (-1, 1), table_bg),
+            ("GRID", (0, 0), (-1, -1), 0.5, table_grid),
+        ]))
+        story.append(status_table)
+        story.append(Spacer(1, 6 * mm))
+
+        # Peso arrivo, Acconto, Peso uscita (senza valore ingresso/uscita)
+        dati_economici = [
+            ["Peso arrivo totale", f"{p.get('peso_arrivo_totale', 0):.2f} kg"],
+            ["Acconto percepito (partita)", f"€ {p.get('acconto_percepito', 0):.2f}"],
+            ["Peso uscita (parziale/totale)", f"{p.get('peso_uscita_totale', 0):.2f} kg"],
+        ]
+        col_w2 = larghezza_totale / 2
+        tab_dati = Table(dati_economici, colWidths=[col_w2] * 2)
+        tab_dati.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (0, -1), table_header_color),
+            ("TEXTCOLOR", (0, 0), (0, -1), colors.white),
+            ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
+            ("BACKGROUND", (1, 0), (1, -1), table_bg),
+            ("FONTSIZE", (0, 0), (-1, -1), 10),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+            ("TOPPADDING", (0, 0), (-1, -1), 6),
+            ("GRID", (0, 0), (-1, -1), 0.5, table_grid),
+        ]))
+        story.append(tab_dati)
+        story.append(Spacer(1, 6 * mm))
+
+        # Destinazioni
+        dest_list = p.get("destinazioni") or []
+        if dest_list:
+            story.append(Paragraph("Destinazioni uscite", subheading_style))
+            dest_data = [["Destinazione", "N. Capi", "Peso totale (kg)"]]
+            for d in dest_list:
+                dest_data.append([
+                    (d.get("destinazione") or "N/A")[:35],
+                    str(d.get("numero_capi", 0)),
+                    f"{d.get('peso_totale', 0):.2f}",
+                ])
+            cw = larghezza_totale / 3
+            dest_table = Table(dest_data, colWidths=[cw * 1.5, cw * 0.75, cw * 0.75])
+            dest_table.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), table_header_color),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("FONTSIZE", (0, 0), (-1, -1), 9),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                ("TOPPADDING", (0, 0), (-1, -1), 4),
+                ("ALIGN", (1, 0), (-1, -1), "CENTER"),
+                ("ALIGN", (2, 0), (2, -1), "RIGHT"),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, table_bg]),
+                ("GRID", (0, 0), (-1, -1), 0.5, table_grid),
+            ]))
+            story.append(dest_table)
+            story.append(Spacer(1, 6 * mm))
+
+        # Dettaglio auricolari: Presenti | Usciti | Deceduti (griglia 6 colonne per sezione)
+        story.append(Paragraph("Dettaglio auricolari", subheading_style))
+        story.append(Spacer(1, 4 * mm))
+
+        num_col = 6
+        col_w_aur = larghezza_totale / num_col
+
+        for label, key in [("Presenti", "auricolari_presenti"), ("Usciti", "auricolari_usciti"), ("Deceduti", "auricolari_deceduti")]:
+            auricolari = p.get(key) or []
+            if not auricolari:
+                story.append(Paragraph(f"{label}: —", styles["Normal"]))
+            else:
+                story.append(Paragraph(f"{label}:", styles["Normal"]))
+                grid_data = []
+                for i in range(0, len(auricolari), num_col):
+                    riga = auricolari[i : i + num_col]
+                    while len(riga) < num_col:
+                        riga.append("")
+                    grid_data.append(riga)
+                t_aur = Table(grid_data, colWidths=[col_w_aur] * num_col)
+                t_aur.setStyle(TableStyle([
+                    ("FONTNAME", (0, 0), (-1, -1), "Courier"),
+                    ("FONTSIZE", (0, 0), (-1, -1), 8),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
+                    ("TOPPADDING", (0, 0), (-1, -1), 2),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 3),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 3),
+                    ("GRID", (0, 0), (-1, -1), 0.3, colors.HexColor("#e0e0e0")),
+                ]))
+                story.append(t_aur)
+            story.append(Spacer(1, 4 * mm))
+
+    build_pdf(doc, story, branding_config)
+    buffer.seek(0)
+    return buffer
+
+
 def generate_prima_nota_dare_avere_pdf(report_data: dict, branding=None):
     """
     Genera PDF per report prima nota dare/avere per fornitore/cliente con layout orizzontale

@@ -76,7 +76,7 @@ class PartitaAnimale(Base):
     
     # Dati partita
     data = Column(Date, nullable=False, index=True)
-    numero_partita = Column(String(50), nullable=True, unique=True, index=True)  # numero univoco partita
+    numero_partita = Column(String(50), nullable=True, index=True)  # univoco solo se deleted_at IS NULL (indice parziale)
     
     # Provenienza/Destinazione (esterna)
     codice_stalla = Column(String(20), nullable=False, index=True)  # codice stalla provenienza/destinazione esterna
@@ -144,7 +144,7 @@ class PartitaAnimale(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     deleted_at = Column(DateTime(timezone=True), nullable=True, index=True)
-    
+
     # Relationships
     animali_partita = relationship("PartitaAnimaleAnimale", back_populates="partita", cascade="all, delete-orphan")
     movimenti_finanziari = relationship(

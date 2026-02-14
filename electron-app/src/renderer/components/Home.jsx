@@ -459,12 +459,6 @@ const Home = ({ setActiveModule }) => {
           <p>Configura l&apos;azienda nelle impostazioni per visualizzare le notifiche.</p>
         </div>
       )}
-
-      {loading && Object.keys(stats).length === 0 && activeTab === 'moduli' && (
-        <div className="loading-state">
-          <p>Caricamento dati...</p>
-        </div>
-      )}
     </div>
   );
 };

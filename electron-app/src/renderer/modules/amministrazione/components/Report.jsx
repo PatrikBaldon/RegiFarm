@@ -7,6 +7,7 @@ import { amministrazioneService } from '../services/amministrazioneService';
 import hybridDataService from '../../../services/hybridDataService';
 import { useAzienda } from '../../../context/AziendaContext';
 import SimpleSelect from '../../../components/SimpleSelect';
+import BaseModal from '../../../components/BaseModal';
 import '../../alimentazione/components/Alimentazione.css';
 import './Report.css';
 
@@ -39,6 +40,13 @@ const Report = () => {
   const [loadingContratti, setLoadingContratti] = useState(false);
   const [loadingDates, setLoadingDates] = useState(false);
   const [reportAllevamentoLoading, setReportAllevamentoLoading] = useState(false);
+  const [reportAllevamentoPerPartitaLoading, setReportAllevamentoPerPartitaLoading] = useState(false);
+  const [partiteIngresso, setPartiteIngresso] = useState([]);
+  const [loadingPartiteIngresso, setLoadingPartiteIngresso] = useState(false);
+  const [selectedPartitaIds, setSelectedPartitaIds] = useState([]);
+  const [reportPerPartiteSelezionateLoading, setReportPerPartiteSelezionateLoading] = useState(false);
+  const [showModalPartiteSelezione, setShowModalPartiteSelezione] = useState(false);
+  const [reportAllevamentoTipo, setReportAllevamentoTipo] = useState('per_data'); // 'per_data' | 'per_partite'
   const [reportAllevamentoFilters, setReportAllevamentoFilters] = useState({
     tipo_selezione: 'azienda', // 'azienda' o 'contratto'
     contratto_id: null,
@@ -136,7 +144,41 @@ const Report = () => {
     
     loadDatesUscita();
   }, [azienda?.id, reportAllevamentoFilters.tipo_selezione, reportAllevamentoFilters.contratto_id, reportAllevamentoFilters.usa_range]);
-  
+
+  // Carica partite di ingresso (solo esterne, no trasferimenti interni) quando si apre la modale
+  const loadPartiteIngressoPerModal = async () => {
+    if (reportAllevamentoFilters.tipo_selezione === 'contratto' && !reportAllevamentoFilters.contratto_id) return;
+    if (reportAllevamentoFilters.tipo_selezione === 'azienda' && !azienda?.id) return;
+    setLoadingPartiteIngresso(true);
+    try {
+      const filters = { tipo: 'ingresso', limit: 500, solo_esterne: true };
+      if (reportAllevamentoFilters.tipo_selezione === 'contratto') {
+        filters.contratto_soccida_id = reportAllevamentoFilters.contratto_id;
+      } else {
+        filters.azienda_id = azienda.id;
+      }
+      const data = await amministrazioneService.getPartite(filters, { forceApi: true });
+      setPartiteIngresso(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setPartiteIngresso([]);
+    } finally {
+      setLoadingPartiteIngresso(false);
+    }
+  };
+
+  const handleOpenModalPartite = () => {
+    if (reportAllevamentoFilters.tipo_selezione === 'contratto' && !reportAllevamentoFilters.contratto_id) {
+      alert('Seleziona prima un contratto');
+      return;
+    }
+    if (reportAllevamentoFilters.tipo_selezione === 'azienda' && !aziendaId) {
+      alert('Seleziona un\'azienda');
+      return;
+    }
+    setShowModalPartiteSelezione(true);
+    loadPartiteIngressoPerModal();
+  };
+
   // Carica contropartite quando cambia azienda
   useEffect(() => {
     const loadContropartite = async () => {
@@ -530,6 +572,126 @@ const Report = () => {
     }
   };
 
+  const handleGenerateReportAllevamentoPerPartita = async () => {
+    if (!aziendaId && reportAllevamentoFilters.tipo_selezione === 'azienda') {
+      alert('Seleziona un\'azienda per generare il report');
+      return;
+    }
+    const isRange = reportAllevamentoFilters.usa_range;
+    if (isRange) {
+      if (!reportAllevamentoFilters.data_uscita_da || !reportAllevamentoFilters.data_uscita_a) {
+        alert('Seleziona entrambe le date per l\'intervallo');
+        return;
+      }
+      if (reportAllevamentoFilters.data_uscita_da > reportAllevamentoFilters.data_uscita_a) {
+        alert('La data iniziale non può essere successiva alla data finale');
+        return;
+      }
+    } else if (!reportAllevamentoFilters.data_uscita) {
+      alert('Seleziona una data di uscita');
+      return;
+    }
+    if (reportAllevamentoFilters.tipo_selezione === 'contratto' && !reportAllevamentoFilters.contratto_id) {
+      alert('Seleziona un contratto');
+      return;
+    }
+    setReportAllevamentoPerPartitaLoading(true);
+    try {
+      const params = {};
+      if (isRange) {
+        params.data_uscita_da = reportAllevamentoFilters.data_uscita_da;
+        params.data_uscita_a = reportAllevamentoFilters.data_uscita_a;
+      } else {
+        params.data_uscita = reportAllevamentoFilters.data_uscita;
+      }
+      if (reportAllevamentoFilters.tipo_selezione === 'contratto') {
+        params.contratto_soccida_id = reportAllevamentoFilters.contratto_id;
+      } else {
+        params.azienda_id = aziendaId;
+      }
+      if (accontiConfig.tipo_gestione !== 'nessuno') {
+        params.tipo_gestione_acconti = accontiConfig.tipo_gestione;
+        if (accontiConfig.tipo_gestione === 'manuale' && accontiConfig.acconto_manuale) {
+          params.acconto_manuale = parseFloat(accontiConfig.acconto_manuale);
+        }
+        if (accontiConfig.tipo_gestione === 'movimenti_interi' && accontiConfig.movimenti_pn_selezionati.length > 0) {
+          params.movimenti_pn_ids = accontiConfig.movimenti_pn_selezionati.join(',');
+        }
+        if (accontiConfig.tipo_gestione === 'fatture_soccida' && accontiConfig.fatture_acconto_selezionate.length > 0) {
+          params.fatture_acconto_selezionate = JSON.stringify(
+            accontiConfig.fatture_acconto_selezionate.map(f => ({
+              fattura_id: f.fattura_id,
+              importo_utilizzato: f.importo_utilizzato,
+            }))
+          );
+        }
+      }
+      const blob = await amministrazioneService.getReportAllevamentoPerPartita(params);
+      if (!blob) throw new Error('Nessun file ricevuto');
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const baseName = isRange
+        ? `report_allevamento_per_partita_dal_${reportAllevamentoFilters.data_uscita_da}_al_${reportAllevamentoFilters.data_uscita_a}`
+        : `report_allevamento_per_partita_uscita_del_${reportAllevamentoFilters.data_uscita}`;
+      link.href = url;
+      link.download = `${baseName}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      if (error?.status === 503 || error?.isServiceUnavailable) {
+        alert('Il server non è temporaneamente disponibile. Riprova più tardi.');
+      } else {
+        alert('Errore durante la generazione del report per partita');
+      }
+    } finally {
+      setReportAllevamentoPerPartitaLoading(false);
+    }
+  };
+
+  const handleGenerateReportByPartiteSelezionate = async () => {
+    if (selectedPartitaIds.length === 0) {
+      alert('Seleziona almeno una partita');
+      return;
+    }
+    if (reportAllevamentoFilters.tipo_selezione === 'contratto' && !reportAllevamentoFilters.contratto_id) {
+      alert('Seleziona un contratto');
+      return;
+    }
+    if (reportAllevamentoFilters.tipo_selezione === 'azienda' && !aziendaId) {
+      alert('Seleziona un\'azienda');
+      return;
+    }
+    setReportPerPartiteSelezionateLoading(true);
+    try {
+      const params = { partita_ids: selectedPartitaIds.join(',') };
+      if (reportAllevamentoFilters.tipo_selezione === 'contratto') {
+        params.contratto_soccida_id = reportAllevamentoFilters.contratto_id;
+      } else {
+        params.azienda_id = aziendaId;
+      }
+      const blob = await amministrazioneService.getReportAllevamentoPerPartita(params);
+      if (!blob) throw new Error('Nessun file ricevuto');
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'report_allevamento_per_partite_selezionate.pdf';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      if (error?.status === 503 || error?.isServiceUnavailable) {
+        alert('Il server non è temporaneamente disponibile. Riprova più tardi.');
+      } else {
+        alert('Errore durante la generazione del report');
+      }
+    } finally {
+      setReportPerPartiteSelezionateLoading(false);
+    }
+  };
+
   const handleGenerateReportPrimaNota = async () => {
     if (!reportPrimaNotaFilters.contropartita_nome) {
       alert('Seleziona un fornitore/cliente');
@@ -808,40 +970,39 @@ const Report = () => {
         </div>
         )}
 
-        {/* REPORT 3: Report Allevamento - Conteggi Vendita Animali */}
+        {/* REPORT 3: Report Allevamento - tipo report → ambito → campi condizionali */}
         {activeTab === 'allevamento' && (
           <div className="report-tab-content">
-            <div className="report-section-header">
-              <div className="report-header-content">
-                <div>
-                  <h3>Report Allevamento - Conteggi Vendita Animali</h3>
-                  <p className="report-description">
-                    Genera un PDF con il conteggio degli animali venduti, inclusi pesi, valori e differenze (PDF)
-                  </p>
-                </div>
+            <h3 className="report-tab-main-title">Report Allevamento</h3>
+
+            {/* Step 1: Tipo di report */}
+            <div className="report-allevamento-step">
+              <label className="report-step-label">Tipo di report *</label>
+              <div className="report-tipo-options">
                 <button
-                  className="btn btn-primary report-header-button"
-                  onClick={handleGenerateReportAllevamento}
-                  disabled={
-                    reportAllevamentoLoading ||
-                    (!reportAllevamentoFilters.usa_range && !reportAllevamentoFilters.data_uscita) ||
-                    (reportAllevamentoFilters.usa_range &&
-                      (!reportAllevamentoFilters.data_uscita_da || !reportAllevamentoFilters.data_uscita_a)) ||
-                    (reportAllevamentoFilters.tipo_selezione === 'contratto' && !reportAllevamentoFilters.contratto_id)
-                  }
+                  type="button"
+                  className={`report-tipo-card ${reportAllevamentoTipo === 'per_data' ? 'active' : ''}`}
+                  onClick={() => setReportAllevamentoTipo('per_data')}
                 >
-                  {reportAllevamentoLoading ? 'Generazione in corso...' : 'Genera Report PDF'}
+                  <span className="report-tipo-card-title">Per data di uscita</span>
+                  <span className="report-tipo-card-desc">Riepilogo o stampa per partita in base alle uscite in una data/intervallo</span>
+                </button>
+                <button
+                  type="button"
+                  className={`report-tipo-card ${reportAllevamentoTipo === 'per_partite' ? 'active' : ''}`}
+                  onClick={() => setReportAllevamentoTipo('per_partite')}
+                >
+                  <span className="report-tipo-card-title">Per partita / insiemi di partite</span>
+                  <span className="report-tipo-card-desc">Scegli una o più partite di ingresso (dall’esterno) e genera il report</span>
                 </button>
               </div>
             </div>
-        
-            <div className="report-allevamento-sections">
-              {/* Prima metà: Selezione e Date */}
-              <div className="report-sections-left">
-                {/* Sezione 1: Selezione e Contratto */}
-                <div className="report-section-group">
+
+            {/* Step 2: Ambito (azienda o contratto) */}
+            <div className="report-allevamento-step">
+              <label className="report-step-label">Ambito *</label>
+              <div className="report-allevamento-sections report-allevamento-inline">
                 <div className="form-group">
-                  <label>Selezione *</label>
                   <SimpleSelect
                     value={reportAllevamentoFilters.tipo_selezione}
                     onChange={(e) => {
@@ -861,12 +1022,10 @@ const Report = () => {
                     allowEmpty={false}
                   />
                 </div>
-                
                 {reportAllevamentoFilters.tipo_selezione === 'contratto' && (
                   <div className="form-group">
-                    <label>Contratto Soccida *</label>
                     {loadingContratti ? (
-                      <div className="loading-message">Caricamento...</div>
+                      <span className="loading-message">Caricamento...</span>
                     ) : (
                       <SimpleSelect
                         value={reportAllevamentoFilters.contratto_id || ''}
@@ -879,9 +1038,9 @@ const Report = () => {
                             data_uscita_a: '',
                           });
                         }}
-                        options={contratti.map((contratto) => ({
-                          label: `${contratto.numero_contratto || `#${contratto.id}`} - ${contratto.soccidante?.nome || 'N/A'}`,
-                          value: contratto.id,
+                        options={contratti.map((c) => ({
+                          label: `${c.numero_contratto || '#' + c.id} - ${c.soccidante?.nome || 'N/A'}`,
+                          value: c.id,
                         }))}
                         placeholder="Seleziona contratto"
                       />
@@ -889,8 +1048,14 @@ const Report = () => {
                   </div>
                 )}
               </div>
+            </div>
 
-              {/* Sezione 2: Date */}
+            {/* Step 3a: Campi per "Per data di uscita" (nascosti se tipo = per_partite) */}
+            {reportAllevamentoTipo === 'per_data' && (
+            <div className="report-allevamento-section-block">
+              <label className="report-step-label">Date e opzioni</label>
+              <div className="report-allevamento-sections">
+                <div className="report-sections-left">
               <div className="report-section-group">
                 <div className="form-group checkbox">
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1226,7 +1391,141 @@ const Report = () => {
               )}
                 </div>
               </div>
+              <div className="report-header-buttons" style={{ marginTop: '12px', flexWrap: 'wrap', gap: '10px' }}>
+                <button
+                  className="btn btn-primary"
+                  onClick={handleGenerateReportAllevamento}
+                  disabled={
+                    reportAllevamentoLoading ||
+                    reportAllevamentoPerPartitaLoading ||
+                    (!reportAllevamentoFilters.usa_range && !reportAllevamentoFilters.data_uscita) ||
+                    (reportAllevamentoFilters.usa_range &&
+                      (!reportAllevamentoFilters.data_uscita_da || !reportAllevamentoFilters.data_uscita_a)) ||
+                    (reportAllevamentoFilters.tipo_selezione === 'contratto' && !reportAllevamentoFilters.contratto_id)
+                  }
+                >
+                  {reportAllevamentoLoading ? 'Generazione...' : 'Genera Report PDF'}
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={handleGenerateReportAllevamentoPerPartita}
+                  disabled={
+                    reportAllevamentoPerPartitaLoading ||
+                    reportAllevamentoLoading ||
+                    (!reportAllevamentoFilters.usa_range && !reportAllevamentoFilters.data_uscita) ||
+                    (reportAllevamentoFilters.usa_range &&
+                      (!reportAllevamentoFilters.data_uscita_da || !reportAllevamentoFilters.data_uscita_a)) ||
+                    (reportAllevamentoFilters.tipo_selezione === 'contratto' && !reportAllevamentoFilters.contratto_id)
+                  }
+                >
+                  {reportAllevamentoPerPartitaLoading ? 'Generazione...' : 'Stampa per partita'}
+                </button>
+              </div>
             </div>
+            </div>
+            )}
+
+            {/* Step 3b: Blocco per "Per partita / insiemi di partite" (nascosto se tipo = per_data) */}
+            {reportAllevamentoTipo === 'per_partite' && (
+            <div className="report-allevamento-section-block">
+              <label className="report-step-label">Partite di ingresso (solo dall’esterno)</label>
+              <p className="report-description">
+                Apri la modale per scegliere una o più partite di ingresso. Verranno mostrate solo le partite dall’esterno (escluse i trasferimenti interni).
+              </p>
+              <div className="report-header-buttons" style={{ marginTop: '8px' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleOpenModalPartite}
+                  disabled={
+                    (reportAllevamentoFilters.tipo_selezione === 'azienda' && !aziendaId) ||
+                    (reportAllevamentoFilters.tipo_selezione === 'contratto' && !reportAllevamentoFilters.contratto_id)
+                  }
+                >
+                  Seleziona partite di ingresso
+                </button>
+                {selectedPartitaIds.length > 0 && (
+                  <span className="report-partite-badge">{selectedPartitaIds.length} partita/e selezionate</span>
+                )}
+              </div>
+              {selectedPartitaIds.length > 0 && (
+                <div className="report-header-buttons" style={{ marginTop: '12px' }}>
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleGenerateReportByPartiteSelezionate}
+                    disabled={reportPerPartiteSelezionateLoading}
+                  >
+                    {reportPerPartiteSelezionateLoading ? 'Generazione...' : 'Genera report per partite selezionate'}
+                  </button>
+                </div>
+              )}
+            </div>
+            )}
+
+            {/* Modale selezione partite (solo esterne) */}
+            <BaseModal
+              isOpen={showModalPartiteSelezione}
+              onClose={() => setShowModalPartiteSelezione(false)}
+              headerLeft={
+                <div className="report-modal-header-left">
+                  <span className="report-modal-title">Seleziona partite di ingresso</span>
+                  <span className="report-modal-subtitle">Solo partite dall’esterno (no trasferimenti interni)</span>
+                </div>
+              }
+              footerActions={
+                <>
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowModalPartiteSelezione(false)}>
+                    Annulla
+                  </button>
+                  <button type="button" className="btn btn-primary" onClick={() => setShowModalPartiteSelezione(false)}>
+                    Conferma ({selectedPartitaIds.length} selezionate)
+                  </button>
+                </>
+              }
+              size="large"
+            >
+              <div className="report-modal-partite-body">
+                {loadingPartiteIngresso ? (
+                  <p className="loading-message">Caricamento partite...</p>
+                ) : partiteIngresso.length === 0 ? (
+                  <p className="form-help-text">Nessuna partita di ingresso dall’esterno trovata per l’ambito selezionato.</p>
+                ) : (
+                  <>
+                    <div className="report-modal-partite-actions">
+                      <button type="button" className="btn btn-sm btn-secondary" onClick={() => setSelectedPartitaIds(partiteIngresso.map(p => p.id))}>
+                        Seleziona tutte
+                      </button>
+                      <button type="button" className="btn btn-sm btn-secondary" onClick={() => setSelectedPartitaIds([])}>
+                        Deseleziona tutte
+                      </button>
+                      <span className="form-help-text" style={{ margin: 0 }}>{selectedPartitaIds.length} di {partiteIngresso.length} selezionate</span>
+                    </div>
+                    <div className="report-modal-partite-list">
+                      {partiteIngresso.map((p) => {
+                        const id = p.id;
+                        const checked = selectedPartitaIds.includes(id);
+                        const dataStr = p.data ? new Date(p.data).toLocaleDateString('it-IT') : 'N/A';
+                        const label = `${p.numero_partita || 'Partita ' + id} — ${dataStr} — ${(p.nome_stalla || p.codice_stalla || '').slice(0, 35)} (${p.numero_capi || 0} capi)`;
+                        return (
+                          <label key={id} className="report-modal-partite-row">
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => {
+                                setSelectedPartitaIds(prev =>
+                                  prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+                                );
+                              }}
+                            />
+                            <span>{label}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
+            </BaseModal>
           </div>
         )}
 

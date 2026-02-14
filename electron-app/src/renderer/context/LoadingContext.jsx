@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import { useAuth } from './AuthContext';
 import { useAzienda } from './AziendaContext';
 import api from '../services/api';
+import { preloadDashboardData } from '../services/dashboardPreload';
 
 const LoadingContext = createContext({
   isLoading: false,
@@ -134,9 +135,13 @@ export const LoadingProvider = ({ children }) => {
             setHasLoadedOnce(true); // Marca come caricato anche se il backend non risponde
           }, 3000);
         } else {
-          // Backend pronto, non aspettare i dati di Home - caricano in background
+          // Backend pronto: precarica i dati della dashboard durante la rotella
+          // così alla prima apertura della Home i dati sono già visibili
+          setIsLoading(true);
+          setLoadingMessage('Caricamento dati...');
+          await preloadDashboardData(azienda.id);
           setIsLoading(false);
-          setHasLoadedOnce(true); // Marca come caricato
+          setHasLoadedOnce(true);
         }
       }
     };

@@ -44,7 +44,7 @@ class PartitaAnimaleBase(BaseModel):
         None, description="ID fattura emessa collegata"
     )
     file_anagrafe_origine: Optional[str] = Field(None, max_length=500, description="Path file .gzip originale")
-    motivo: Optional[str] = Field(None, max_length=1, description="Motivo ingresso/uscita")
+    motivo: Optional[str] = Field(None, max_length=5, description="Motivo ingresso/uscita")
     numero_modello: Optional[str] = Field(None, max_length=50, description="Numero modello movimento")
     is_trasferimento_interno: bool = Field(False, description="True se trasferimento interno, False se esterno")
     note: Optional[str] = Field(None, description="Note")
@@ -65,7 +65,7 @@ class PartitaAnimaleUpdate(BaseModel):
     peso_totale: Optional[Decimal] = None
     peso_medio: Optional[Decimal] = None
     pesi_individuali: Optional[List[PesoIndividuale]] = None
-    motivo: Optional[str] = Field(None, max_length=1)
+    motivo: Optional[str] = Field(None, max_length=5)
     numero_modello: Optional[str] = Field(None, max_length=50)
     is_trasferimento_interno: Optional[bool] = None
     note: Optional[str] = None
@@ -157,7 +157,7 @@ class PartitaAnimaleConfirm(BaseModel):
     peso_totale: Optional[Decimal] = Field(None, description="Peso totale partita")
     is_trasferimento_interno: bool = Field(False, description="Trasferimento interno")
     codici_capi: List[str] = Field(default_factory=list, description="Lista codici capi")
-    motivo: Optional[str] = Field(None, max_length=1, description="Motivo movimento")
+    motivo: Optional[str] = Field(None, max_length=5, description="Motivo movimento (D, 02, 2 per decesso)")
     numero_modello: Optional[str] = Field(None, max_length=50, description="Numero modello")
     file_anagrafe_origine: Optional[str] = Field(None, max_length=500, description="File origine")
     animali_dati: Optional[Dict[str, Dict[str, Union[str, date]]]] = Field(None, description="Dati anagrafici per ogni animale (sesso, razza, data_nascita)")

@@ -118,6 +118,7 @@ def calculate_report_allevamento_data(
     acconto_manuale: Optional[Decimal] = None,
     movimenti_pn_ids: Optional[List[int]] = None,
     fatture_acconto_selezionate: Optional[List[Dict]] = None,
+    include_riepilogo_per_partita: bool = False,
 ) -> Dict:
     """
     Calcola i dati per il report allevamento su una data o intervallo di date.
@@ -190,6 +191,7 @@ def calculate_report_allevamento_data(
             "dettaglio_animali": [],
             "riepilogo_proprieta": {},
             "riepilogo_soccida": {},
+            "riepilogo_per_partita": [],
         }
 
     # Precarica tutte le partite di ingresso per gli animali coinvolti (VENDUTI)
@@ -865,7 +867,163 @@ def calculate_report_allevamento_data(
         elif tipo_gestione_acconti == 'manuale' and acconto_manuale is not None:
             gestione_acconti_info["dettaglio"] = {"acconto_manuale": float(acconto_manuale)}
 
-    return {
+    # ========== RIEPILOGO PER PARTITA DI INGRESSO (stessa struttura per ogni partita) ==========
+    riepilogo_per_partita: List[Dict] = []
+    if include_riepilogo_per_partita and partite_ingresso_ids:
+        # Mappa acconto percepito per partita (da dettaglio_soccida)
+        acconto_per_partita_id: Dict[int, float] = {}
+        for det in dettaglio_soccida:
+            acconti = det.get("acconti_ricevuti") or {}
+            for pid, pdata in (acconti.get("acconti_per_partita") or {}).items():
+                tot = pdata.get("totale") or 0
+                acconto_per_partita_id[pid] = acconto_per_partita_id.get(pid, 0) + float(to_decimal(tot))
+
+        # Per ogni animale uscito (anche fuori periodo) recupera ultima partita uscita e peso
+        all_animale_ids_partite = set()
+        partita_animale_ids_map: Dict[int, List[int]] = {}  # partita_ingresso_id -> [animale_id]
+        for partita_ingresso_id in partite_ingresso_ids:
+            entries_p = (
+                db.query(PartitaAnimaleAnimale.animale_id)
+                .filter(PartitaAnimaleAnimale.partita_animale_id == partita_ingresso_id)
+                .all()
+            )
+            ids_p = [e.animale_id for e in entries_p]
+            partita_animale_ids_map[partita_ingresso_id] = ids_p
+            all_animale_ids_partite.update(ids_p)
+
+        # Ultima partita uscita per animale (per tutti gli animali delle partite)
+        uscite_per_animale: Dict[int, Tuple[PartitaAnimaleAnimale, PartitaAnimale]] = {}
+        if all_animale_ids_partite:
+            subq = (
+                db.query(
+                    PartitaAnimaleAnimale.animale_id,
+                    PartitaAnimaleAnimale.id.label("paa_id"),
+                    func.row_number()
+                    .over(
+                        partition_by=PartitaAnimaleAnimale.animale_id,
+                        order_by=PartitaAnimale.data.desc(),
+                    )
+                    .label("rn"),
+                )
+                .join(PartitaAnimale, PartitaAnimaleAnimale.partita_animale_id == PartitaAnimale.id)
+                .filter(
+                    PartitaAnimaleAnimale.animale_id.in_(all_animale_ids_partite),
+                    PartitaAnimale.tipo == TipoPartita.USCITA,
+                    PartitaAnimale.deleted_at.is_(None),
+                )
+            )
+            subq = subq.subquery()
+            last_uscita_ids = db.query(subq.c.paa_id).filter(subq.c.rn == 1).all()
+            last_uscita_ids = [r[0] for r in last_uscita_ids]
+            if last_uscita_ids:
+                last_uscita_entries = (
+                    db.query(PartitaAnimaleAnimale)
+                    .filter(PartitaAnimaleAnimale.id.in_(last_uscita_ids))
+                    .options(
+                        joinedload(PartitaAnimaleAnimale.partita).joinedload(PartitaAnimale.fattura_amministrazione),
+                        joinedload(PartitaAnimaleAnimale.animale),
+                    )
+                    .all()
+                )
+                for entry in last_uscita_entries:
+                    uscite_per_animale[entry.animale_id] = (entry, entry.partita)
+
+        # Ordine partite: per data arrivo, poi id
+        partite_objs_ord = (
+            db.query(PartitaAnimale)
+            .filter(PartitaAnimale.id.in_(partite_ingresso_ids))
+            .options(joinedload(PartitaAnimale.fattura_amministrazione))
+            .all()
+        )
+        partite_data_map = {p.id: (p.data or date.min) for p in partite_objs_ord}
+        partita_by_id = {p.id: p for p in partite_objs_ord}
+        partite_ingresso_ord = sorted(
+            partite_ingresso_ids,
+            key=lambda pid: (partite_data_map.get(pid, date.min), pid),
+        )
+
+        for partita_ingresso_id in partite_ingresso_ord:
+            partita = partita_by_id.get(partita_ingresso_id)
+            if not partita:
+                continue
+
+            entries_ing = (
+                db.query(PartitaAnimaleAnimale)
+                .filter(PartitaAnimaleAnimale.partita_animale_id == partita_ingresso_id)
+                .options(joinedload(PartitaAnimaleAnimale.animale))
+                .all()
+            )
+
+            auricolari_presenti: List[str] = []
+            auricolari_usciti: List[str] = []
+            auricolari_deceduti: List[str] = []
+            peso_arrivo_tot = Decimal(0)
+            peso_uscita_tot = Decimal(0)
+            valore_ingresso_tot = get_valore_da_partita(partita, per_capo=False)
+            valore_uscita_tot = Decimal(0)
+            destinazioni_agg: Dict[str, Dict[str, float]] = defaultdict(lambda: {"numero_capi": 0, "peso_totale": 0.0})
+
+            for rec in entries_ing:
+                animale = rec.animale
+                if not animale or animale.deleted_at:
+                    continue
+                aur = (animale.auricolare or "N/A").strip()
+                peso_arrivo_animale = get_peso(rec, animale, "peso_arrivo")
+                # Peso arrivo: solo per capi non deceduti (presenti + usciti)
+                if animale.stato != "deceduto":
+                    peso_arrivo_tot += peso_arrivo_animale
+
+                if animale.stato == "deceduto":
+                    auricolari_deceduti.append(aur)
+                elif animale.stato in ("presente",):
+                    auricolari_presenti.append(aur)
+                else:
+                    auricolari_usciti.append(aur)
+                    tup = uscite_per_animale.get(animale.id)
+                    if tup:
+                        entry_uscita, partita_uscita = tup
+                        peso_u = get_peso(entry_uscita, animale, "peso_attuale")
+                        peso_uscita_tot += peso_u
+                        valore_uscita_tot += get_valore_da_partita(partita_uscita, per_capo=True)
+                        dest = (partita_uscita.nome_stalla or partita_uscita.codice_stalla or "N/A").strip()
+                        destinazioni_agg[dest]["numero_capi"] += 1
+                        destinazioni_agg[dest]["peso_totale"] += float(peso_u)
+
+            numero_arrivati = len(entries_ing)
+            numero_usciti = len(auricolari_usciti)
+            numero_deceduti = len(auricolari_deceduti)
+            numero_presenti = len(auricolari_presenti)
+
+            acconto = acconto_per_partita_id.get(partita_ingresso_id, 0.0)
+
+            destinazioni_list = [
+                {"destinazione": k, "numero_capi": v["numero_capi"], "peso_totale": round(v["peso_totale"], 2)}
+                for k, v in sorted(destinazioni_agg.items())
+            ]
+
+            data_arrivo_str = partita.data.isoformat() if partita.data else None
+            riepilogo_per_partita.append({
+                "partita_id": partita_ingresso_id,
+                "numero_partita": partita.numero_partita or f"Partita {partita_ingresso_id}",
+                "data_arrivo": data_arrivo_str,
+                "codice_stalla": partita.codice_stalla or "N/A",
+                "nome_stalla": (partita.nome_stalla or "").strip() or None,
+                "numero_capi_arrivati": numero_arrivati,
+                "numero_usciti": numero_usciti,
+                "numero_deceduti": numero_deceduti,
+                "numero_presenti": numero_presenti,
+                "auricolari_presenti": sorted(auricolari_presenti),
+                "auricolari_usciti": sorted(auricolari_usciti),
+                "auricolari_deceduti": sorted(auricolari_deceduti),
+                "peso_arrivo_totale": round(float(peso_arrivo_tot), 2),
+                "valore_ingresso_totale": round(float(valore_ingresso_tot), 2),
+                "acconto_percepito": round(float(acconto), 2),
+                "peso_uscita_totale": round(float(peso_uscita_tot), 2),
+                "valore_uscita_totale": round(float(valore_uscita_tot), 2),
+                "destinazioni": destinazioni_list,
+            })
+
+    result = {
         "data_uscita": periodo_label,
         "periodo_label": periodo_label,
         "date_range": {
@@ -909,6 +1067,581 @@ def calculate_report_allevamento_data(
         },
         "gestione_acconti": gestione_acconti_info,
         "ha_acconti": ha_acconti,
+        "riepilogo_per_partita": riepilogo_per_partita,
+    }
+    return result
+
+
+def calculate_riepilogo_per_partita_by_ids(
+    db: Session,
+    partita_ids: List[int],
+    azienda_id: Optional[int] = None,
+    contratto_soccida_id: Optional[int] = None,
+) -> List[Dict]:
+    """
+    Calcola il riepilogo per partita (stesso formato di riepilogo_per_partita) per le partite
+    di ingresso indicate da partita_ids. Usato per il report "per partita / insiemi di partite"
+    senza filtro su data di uscita.
+    """
+    if not partita_ids:
+        return []
+
+    partite_ingresso_ids = list(set(partita_ids))
+    peso_cache: Dict[int, Dict[str, Decimal]] = {}
+
+    def get_peso_individuale(partita: PartitaAnimale, auricolare: Optional[str]) -> Optional[Decimal]:
+        if not partita or not partita.pesi_individuali or not auricolare:
+            return None
+        if partita.id not in peso_cache:
+            try:
+                data = json.loads(partita.pesi_individuali)
+                peso_cache[partita.id] = {
+                    item.get("auricolare"): to_decimal(item.get("peso"))
+                    for item in data
+                    if item.get("auricolare") is not None and item.get("peso") is not None
+                }
+            except Exception:
+                peso_cache[partita.id] = {}
+        return peso_cache[partita.id].get(auricolare)
+
+    def get_peso(record: Optional[PartitaAnimaleAnimale], animale: Animale, fallback_attr: str) -> Decimal:
+        if not record:
+            return Decimal(0)
+        if record.peso is not None:
+            return to_decimal(record.peso)
+        partita = record.partita
+        peso = get_peso_individuale(partita, animale.auricolare)
+        if peso is not None:
+            return peso
+        # Preferire il peso del singolo animale (fallback_attr) rispetto a partita.peso_medio,
+        # così il peso uscita è "solo per i capi conteggiati" anche se la partita include capi di altre partite
+        fallback_value = getattr(animale, fallback_attr, None)
+        if fallback_value is not None:
+            return to_decimal(fallback_value)
+        if partita and partita.peso_medio is not None:
+            return to_decimal(partita.peso_medio)
+        return Decimal(0)
+
+    def get_valore_da_partita(partita: Optional[PartitaAnimale], per_capo: bool = True) -> Decimal:
+        if not partita:
+            return Decimal(0)
+        if partita.valore_totale:
+            valore_totale = to_decimal(partita.valore_totale)
+            if per_capo and partita.numero_capi and partita.numero_capi > 0:
+                return valore_totale / partita.numero_capi
+            return valore_totale
+        fattura = partita.fattura_amministrazione if hasattr(partita, "fattura_amministrazione") else None
+        if fattura and getattr(fattura, "importo_totale", None):
+            valore_totale = to_decimal(fattura.importo_totale)
+            if per_capo and partita.numero_capi and partita.numero_capi > 0:
+                return valore_totale / partita.numero_capi
+            return valore_totale
+        return Decimal(0)
+
+    # Acconto per partita da PartitaMovimentoFinanziario
+    acconto_per_partita_id: Dict[int, float] = {}
+    movimenti = (
+        db.query(PartitaMovimentoFinanziario)
+        .filter(
+            PartitaMovimentoFinanziario.partita_id.in_(partite_ingresso_ids),
+            PartitaMovimentoFinanziario.tipo == PartitaMovimentoTipo.ACCONTO,
+            PartitaMovimentoFinanziario.direzione == PartitaMovimentoDirezione.ENTRATA,
+            PartitaMovimentoFinanziario.attivo,
+        )
+        .all()
+    )
+    for m in movimenti:
+        acconto_per_partita_id[m.partita_id] = acconto_per_partita_id.get(m.partita_id, 0) + float(to_decimal(m.importo))
+
+    all_animale_ids_partite = set()
+    for partita_ingresso_id in partite_ingresso_ids:
+        entries_p = (
+            db.query(PartitaAnimaleAnimale.animale_id)
+            .filter(PartitaAnimaleAnimale.partita_animale_id == partita_ingresso_id)
+            .all()
+        )
+        all_animale_ids_partite.update(e.animale_id for e in entries_p)
+
+    uscite_per_animale: Dict[int, Tuple[PartitaAnimaleAnimale, PartitaAnimale]] = {}
+    if all_animale_ids_partite:
+        subq = (
+            db.query(
+                PartitaAnimaleAnimale.animale_id,
+                PartitaAnimaleAnimale.id.label("paa_id"),
+                func.row_number()
+                .over(
+                    partition_by=PartitaAnimaleAnimale.animale_id,
+                    order_by=PartitaAnimale.data.desc(),
+                )
+                .label("rn"),
+            )
+            .join(PartitaAnimale, PartitaAnimaleAnimale.partita_animale_id == PartitaAnimale.id)
+            .filter(
+                PartitaAnimaleAnimale.animale_id.in_(all_animale_ids_partite),
+                PartitaAnimale.tipo == TipoPartita.USCITA,
+                PartitaAnimale.deleted_at.is_(None),
+            )
+        )
+        subq = subq.subquery()
+        last_uscita_ids = [r[0] for r in db.query(subq.c.paa_id).filter(subq.c.rn == 1).all()]
+        if last_uscita_ids:
+            last_uscita_entries = (
+                db.query(PartitaAnimaleAnimale)
+                .filter(PartitaAnimaleAnimale.id.in_(last_uscita_ids))
+                .options(
+                    joinedload(PartitaAnimaleAnimale.partita).joinedload(PartitaAnimale.fattura_amministrazione),
+                    joinedload(PartitaAnimaleAnimale.animale),
+                )
+                .all()
+            )
+            for entry in last_uscita_entries:
+                uscite_per_animale[entry.animale_id] = (entry, entry.partita)
+
+    partite_objs = (
+        db.query(PartitaAnimale)
+        .filter(PartitaAnimale.id.in_(partite_ingresso_ids))
+        .options(joinedload(PartitaAnimale.fattura_amministrazione))
+        .all()
+    )
+    partita_by_id = {p.id: p for p in partite_objs}
+    partite_ingresso_ord = sorted(
+        partite_ingresso_ids,
+        key=lambda pid: (
+            (partita_by_id.get(pid).data or date.min) if partita_by_id.get(pid) else date.min,
+            pid,
+        ),
+    )
+
+    riepilogo: List[Dict] = []
+    for partita_ingresso_id in partite_ingresso_ord:
+        partita = partita_by_id.get(partita_ingresso_id)
+        if not partita:
+            continue
+        entries_ing = (
+            db.query(PartitaAnimaleAnimale)
+            .filter(PartitaAnimaleAnimale.partita_animale_id == partita_ingresso_id)
+            .options(joinedload(PartitaAnimaleAnimale.animale))
+            .all()
+        )
+        auricolari_presenti = []
+        auricolari_usciti = []
+        auricolari_deceduti = []
+        peso_arrivo_tot = Decimal(0)
+        peso_arrivo_totale_iniziale = Decimal(0)  # tutti i capi (inclusi deceduti)
+        peso_deceduti = Decimal(0)
+        peso_uscita_tot = Decimal(0)
+        valore_ingresso_tot = Decimal(0)
+        valore_uscita_tot = Decimal(0)
+        destinazioni_agg = defaultdict(lambda: {"numero_capi": 0, "peso_totale": 0.0})
+
+        valore_ingresso_tot = get_valore_da_partita(partita, per_capo=False)
+
+        for rec in entries_ing:
+            animale = rec.animale
+            if not animale or animale.deleted_at:
+                continue
+            aur = (animale.auricolare or "N/A").strip()
+            peso_arrivo_animale = get_peso(rec, animale, "peso_arrivo")
+            peso_arrivo_totale_iniziale += peso_arrivo_animale
+            # Peso arrivo: solo per capi non deceduti (presenti + usciti), come da richiesta
+            if animale.stato != "deceduto":
+                peso_arrivo_tot += peso_arrivo_animale
+            if animale.stato == "deceduto":
+                auricolari_deceduti.append(aur)
+                peso_deceduti += peso_arrivo_animale
+            elif animale.stato == "presente":
+                auricolari_presenti.append(aur)
+            else:
+                auricolari_usciti.append(aur)
+                tup = uscite_per_animale.get(animale.id)
+                if tup:
+                    entry_uscita, partita_uscita = tup
+                    # Peso uscita: solo del singolo capo conteggiato (record/auricolare/animale), non il totale partita
+                    peso_u = get_peso(entry_uscita, animale, "peso_attuale")
+                    peso_uscita_tot += peso_u
+                    valore_uscita_tot += get_valore_da_partita(partita_uscita, per_capo=True)
+                    dest = (partita_uscita.nome_stalla or partita_uscita.codice_stalla or "N/A").strip()
+                    destinazioni_agg[dest]["numero_capi"] += 1
+                    destinazioni_agg[dest]["peso_totale"] += float(peso_u)
+
+        numero_arrivati = len(entries_ing)
+        numero_usciti = len(auricolari_usciti)
+        numero_deceduti = len(auricolari_deceduti)
+        numero_presenti = len(auricolari_presenti)
+        acconto = acconto_per_partita_id.get(partita_ingresso_id, 0.0)
+        destinazioni_list = [
+            {"destinazione": k, "numero_capi": v["numero_capi"], "peso_totale": round(v["peso_totale"], 2)}
+            for k, v in sorted(destinazioni_agg.items())
+        ]
+        data_arrivo_str = partita.data.isoformat() if partita.data else None
+        riepilogo.append({
+            "partita_id": partita_ingresso_id,
+            "numero_partita": partita.numero_partita or f"Partita {partita_ingresso_id}",
+            "data_arrivo": data_arrivo_str,
+            "codice_stalla": partita.codice_stalla or "N/A",
+            "nome_stalla": (partita.nome_stalla or "").strip() or None,
+            "numero_capi_arrivati": numero_arrivati,
+            "numero_usciti": numero_usciti,
+            "numero_deceduti": numero_deceduti,
+            "numero_presenti": numero_presenti,
+            "auricolari_presenti": sorted(auricolari_presenti),
+            "auricolari_usciti": sorted(auricolari_usciti),
+            "auricolari_deceduti": sorted(auricolari_deceduti),
+            "peso_arrivo_totale": round(float(peso_arrivo_tot), 2),
+            "peso_arrivo_totale_iniziale": round(float(peso_arrivo_totale_iniziale), 2),
+            "peso_deceduti": round(float(peso_deceduti), 2),
+            "valore_ingresso_totale": round(float(valore_ingresso_tot), 2),
+            "acconto_percepito": round(float(acconto), 2),
+            "peso_uscita_totale": round(float(peso_uscita_tot), 2),
+            "valore_uscita_totale": round(float(valore_uscita_tot), 2),
+            "destinazioni": destinazioni_list,
+        })
+
+    return riepilogo
+
+
+def calculate_riepilogo_valore_per_partite_ids(
+    db: Session,
+    partita_ids: List[int],
+    azienda_id: Optional[int] = None,
+    contratto_soccida_id: Optional[int] = None,
+) -> Dict:
+    """
+    Calcola il riepilogo del valore (come nel report per data di uscita) per le partite di ingresso
+    indicate, usando la tipologia e le proprietà del contratto soccida collegato.
+    Restituisce riepilogo_proprieta e riepilogo_soccida con dettaglio_contratti.
+    """
+    if not partita_ids:
+        return {"riepilogo_proprieta": {}, "riepilogo_soccida": {}}
+
+    partite_ingresso_ids = list(set(partita_ids))
+    peso_cache: Dict[int, Dict[str, Decimal]] = {}
+
+    def get_peso_individuale(partita: PartitaAnimale, auricolare: Optional[str]) -> Optional[Decimal]:
+        if not partita or not partita.pesi_individuali or not auricolare:
+            return None
+        if partita.id not in peso_cache:
+            try:
+                data = json.loads(partita.pesi_individuali)
+                peso_cache[partita.id] = {
+                    item.get("auricolare"): to_decimal(item.get("peso"))
+                    for item in data
+                    if item.get("auricolare") is not None and item.get("peso") is not None
+                }
+            except Exception:
+                peso_cache[partita.id] = {}
+        return peso_cache[partita.id].get(auricolare)
+
+    def get_peso(record: Optional[PartitaAnimaleAnimale], animale: Animale, fallback_attr: str) -> Decimal:
+        if not record:
+            return Decimal(0)
+        if record.peso is not None:
+            return to_decimal(record.peso)
+        partita = record.partita
+        peso = get_peso_individuale(partita, animale.auricolare) if partita and animale else None
+        if peso is not None:
+            return peso
+        # Preferire il peso del singolo animale rispetto a partita.peso_medio (peso uscita = solo capi conteggiati)
+        fallback_value = getattr(animale, fallback_attr, None)
+        if fallback_value is not None:
+            return to_decimal(fallback_value)
+        if partita and partita.peso_medio is not None:
+            return to_decimal(partita.peso_medio)
+        return Decimal(0)
+
+    def get_valore_da_partita(partita: Optional[PartitaAnimale], per_capo: bool = True) -> Decimal:
+        if not partita:
+            return Decimal(0)
+        if partita.valore_totale:
+            valore_totale = to_decimal(partita.valore_totale)
+            if per_capo and partita.numero_capi and partita.numero_capi > 0:
+                return valore_totale / partita.numero_capi
+            return valore_totale
+        fattura = getattr(partita, "fattura_amministrazione", None)
+        if fattura and getattr(fattura, "importo_totale", None):
+            valore_totale = to_decimal(fattura.importo_totale)
+            if per_capo and partita.numero_capi and partita.numero_capi > 0:
+                return valore_totale / partita.numero_capi
+            return valore_totale
+        return Decimal(0)
+
+    # Carica partite di ingresso con fattura
+    partite_objs = (
+        db.query(PartitaAnimale)
+        .filter(PartitaAnimale.id.in_(partite_ingresso_ids))
+        .options(joinedload(PartitaAnimale.fattura_amministrazione))
+        .all()
+    )
+    partita_by_id = {p.id: p for p in partite_objs}
+
+    # Tutti gli animale_id che appartengono alle partite
+    all_animale_ids = set()
+    for partita_ingresso_id in partite_ingresso_ids:
+        for e in db.query(PartitaAnimaleAnimale.animale_id).filter(
+            PartitaAnimaleAnimale.partita_animale_id == partita_ingresso_id
+        ).all():
+            all_animale_ids.add(e.animale_id)
+
+    # Ultima uscita per animale
+    uscite_per_animale: Dict[int, Tuple[PartitaAnimaleAnimale, PartitaAnimale]] = {}
+    if all_animale_ids:
+        subq = (
+            db.query(
+                PartitaAnimaleAnimale.animale_id,
+                PartitaAnimaleAnimale.id.label("paa_id"),
+                func.row_number()
+                .over(
+                    partition_by=PartitaAnimaleAnimale.animale_id,
+                    order_by=PartitaAnimale.data.desc(),
+                )
+                .label("rn"),
+            )
+            .join(PartitaAnimale, PartitaAnimaleAnimale.partita_animale_id == PartitaAnimale.id)
+            .filter(
+                PartitaAnimaleAnimale.animale_id.in_(all_animale_ids),
+                PartitaAnimale.tipo == TipoPartita.USCITA,
+                PartitaAnimale.deleted_at.is_(None),
+            )
+        )
+        subq = subq.subquery()
+        last_uscita_ids = [r[0] for r in db.query(subq.c.paa_id).filter(subq.c.rn == 1).all()]
+        if last_uscita_ids:
+            last_uscita_entries = (
+                db.query(PartitaAnimaleAnimale)
+                .filter(PartitaAnimaleAnimale.id.in_(last_uscita_ids))
+                .options(
+                    joinedload(PartitaAnimaleAnimale.partita).joinedload(PartitaAnimale.fattura_amministrazione),
+                    joinedload(PartitaAnimaleAnimale.animale),
+                )
+                .all()
+            )
+            for entry in last_uscita_entries:
+                uscite_per_animale[entry.animale_id] = (entry, entry.partita)
+
+    # Uscita entries: (animale, uscita_record) per animali usciti che appartengono alle nostre partite
+    uscita_entries: List[Tuple[Animale, PartitaAnimaleAnimale]] = []
+    ingressi_per_animale: Dict[int, List[PartitaAnimaleAnimale]] = defaultdict(list)
+
+    for partita_ingresso_id in partite_ingresso_ids:
+        entries_ing = (
+            db.query(PartitaAnimaleAnimale)
+            .filter(PartitaAnimaleAnimale.partita_animale_id == partita_ingresso_id)
+            .options(
+                joinedload(PartitaAnimaleAnimale.animale),
+                joinedload(PartitaAnimaleAnimale.partita),
+            )
+            .all()
+        )
+        for rec in entries_ing:
+            animale = rec.animale
+            if not animale or animale.deleted_at:
+                continue
+            if animale.id not in uscite_per_animale:
+                continue
+            uscita_entry, _ = uscite_per_animale[animale.id]
+            uscita_entries.append((animale, uscita_entry))
+            ingressi_per_animale[animale.id].append(rec)
+
+    for animale_id in ingressi_per_animale:
+        ingressi_per_animale[animale_id].sort(
+            key=lambda r: (r.partita.data if r.partita and r.partita.data else date.min)
+        )
+
+    def get_partita_ingresso_pair(animale_id: int) -> Tuple[Optional[PartitaAnimaleAnimale], Optional[PartitaAnimaleAnimale]]:
+        recs = ingressi_per_animale.get(animale_id)
+        if not recs:
+            return None, None
+        return recs[0], recs[-1]
+
+    # Split proprietà / soccida
+    animali_proprieta_entries: List[Tuple[Animale, PartitaAnimaleAnimale]] = []
+    animali_per_contratto: Dict[int, List[Tuple[Animale, PartitaAnimaleAnimale]]] = defaultdict(list)
+    for animale, uscita_record in uscita_entries:
+        if animale.contratto_soccida_id:
+            animali_per_contratto[animale.contratto_soccida_id].append((animale, uscita_record))
+        else:
+            animali_proprieta_entries.append((animale, uscita_record))
+
+    # --- Riepilogo proprietà ---
+    totale_peso_arrivo_proprieta = Decimal(0)
+    totale_valore_acquisto_proprieta = Decimal(0)
+    totale_peso_uscita_proprieta = Decimal(0)
+    totale_valore_vendita_proprieta = Decimal(0)
+    for animale, uscita_record in animali_proprieta_entries:
+        ingresso_originale, ingresso_recente = get_partita_ingresso_pair(animale.id)
+        if not ingresso_recente:
+            continue
+        peso_arrivo = get_peso(ingresso_recente, animale, "peso_arrivo")
+        peso_uscita = get_peso(uscita_record, animale, "peso_attuale")
+        valore_acquisto = get_valore_da_partita(ingresso_recente.partita, per_capo=True)
+        valore_vendita = get_valore_da_partita(uscita_record.partita, per_capo=True) if uscita_record.partita else Decimal(0)
+        totale_peso_arrivo_proprieta += peso_arrivo
+        totale_valore_acquisto_proprieta += valore_acquisto
+        totale_peso_uscita_proprieta += peso_uscita
+        totale_valore_vendita_proprieta += valore_vendita
+
+    riepilogo_proprieta = {
+        "numero_capi": len(animali_proprieta_entries),
+        "peso_arrivo": round(float(totale_peso_arrivo_proprieta), 2),
+        "valore_acquisto": round(float(totale_valore_acquisto_proprieta), 2),
+        "peso_uscita": round(float(totale_peso_uscita_proprieta), 2),
+        "valore_vendita": round(float(totale_valore_vendita_proprieta), 2),
+        "differenza_peso": round(float(totale_peso_uscita_proprieta - totale_peso_arrivo_proprieta), 2),
+        "differenza_valore": round(float(totale_valore_vendita_proprieta - totale_valore_acquisto_proprieta), 2),
+    }
+
+    # --- Riepilogo soccida (per contratto, con valore come nel report per data) ---
+    contratti_ids = list(animali_per_contratto.keys())
+    contratti_map = {}
+    if contratti_ids:
+        contratti_map = {
+            c.id: c
+            for c in db.query(ContrattoSoccida)
+            .filter(ContrattoSoccida.id.in_(contratti_ids))
+            .options(joinedload(ContrattoSoccida.soccidante))
+            .all()
+        }
+
+    totale_peso_arrivo_soccida = Decimal(0)
+    totale_peso_uscita_soccida = Decimal(0)
+    totale_differenza_peso_soccida = Decimal(0)
+    totale_valore_soccida = Decimal(0)
+    dettaglio_soccida: List[Dict] = []
+
+    for contratto_id, entries in animali_per_contratto.items():
+        contratto = contratti_map.get(contratto_id)
+        if not contratto:
+            continue
+
+        peso_arrivo_contratto = Decimal(0)
+        peso_uscita_contratto = Decimal(0)
+        for animale, uscita_record in entries:
+            ingresso_originale, ingresso_recente = get_partita_ingresso_pair(animale.id)
+            if not ingresso_originale:
+                continue
+            peso_arrivo_originale = get_peso(ingresso_originale, animale, "peso_arrivo")
+            peso_arrivo = peso_arrivo_originale
+            if contratto.percentuale_aggiunta_arrivo:
+                peso_arrivo = peso_arrivo_originale * (Decimal(1) + to_decimal(contratto.percentuale_aggiunta_arrivo) / 100)
+            peso_uscita_originale = get_peso(uscita_record, animale, "peso_attuale")
+            peso_uscita = peso_uscita_originale
+            if contratto.percentuale_sottrazione_uscita:
+                peso_uscita = peso_uscita_originale * (Decimal(1) - to_decimal(contratto.percentuale_sottrazione_uscita) / 100)
+            peso_arrivo_contratto += peso_arrivo
+            peso_uscita_contratto += peso_uscita
+
+        peso_arrivo_originale_contratto = Decimal(0)
+        peso_uscita_originale_contratto = Decimal(0)
+        for animale, uscita_record in entries:
+            ingresso_originale, _ = get_partita_ingresso_pair(animale.id)
+            if not ingresso_originale:
+                continue
+            peso_arrivo_originale_contratto += get_peso(ingresso_originale, animale, "peso_arrivo")
+            peso_uscita_originale_contratto += get_peso(uscita_record, animale, "peso_attuale")
+
+        differenza_peso_contratto = peso_uscita_contratto - peso_arrivo_contratto
+        valore_contratto = Decimal(0)
+
+        date_arrivo = [animale.data_arrivo for animale, _ in entries if animale.data_arrivo]
+        date_end_contratto = date.today()
+        if entries:
+            date_uscite = []
+            for animale, uscita_record in entries:
+                if uscita_record.partita and uscita_record.partita.data:
+                    date_uscite.append(uscita_record.partita.data)
+            if date_uscite:
+                date_end_contratto = max(date_uscite)
+        giorni_gestione = 0
+        if date_arrivo:
+            giorni_gestione = (date_end_contratto - min(date_arrivo)).days
+            if giorni_gestione < 0:
+                giorni_gestione = 0
+
+        prezzo_vendita_medio = Decimal(0)
+        if differenza_peso_contratto > 0:
+            for animale, uscita_record in entries:
+                partita = uscita_record.partita
+                if not partita:
+                    continue
+                if partita.peso_totale and partita.valore_totale:
+                    prezzo_vendita_medio = to_decimal(partita.valore_totale) / to_decimal(partita.peso_totale)
+                    break
+                if partita.numero_capi and partita.valore_totale and partita.peso_medio:
+                    prezzo_vendita_medio = (to_decimal(partita.valore_totale) / partita.numero_capi) / to_decimal(partita.peso_medio)
+                    break
+        if prezzo_vendita_medio == 0 and contratto.prezzo_per_kg:
+            prezzo_vendita_medio = to_decimal(contratto.prezzo_per_kg)
+
+        if contratto.modalita_remunerazione == 'prezzo_kg' and contratto.prezzo_per_kg:
+            valore_contratto = differenza_peso_contratto * to_decimal(contratto.prezzo_per_kg)
+        elif contratto.modalita_remunerazione == 'quota_giornaliera' and contratto.quota_giornaliera:
+            valore_contratto = to_decimal(contratto.quota_giornaliera) * len(entries) * giorni_gestione
+        elif contratto.modalita_remunerazione == 'percentuale' and contratto.percentuale_remunerazione:
+            if prezzo_vendita_medio > 0 and differenza_peso_contratto > 0:
+                valore_totale = differenza_peso_contratto * prezzo_vendita_medio
+                valore_contratto = valore_totale * to_decimal(contratto.percentuale_remunerazione) / 100
+        elif contratto.modalita_remunerazione == 'ripartizione_utili':
+            if prezzo_vendita_medio > 0 and differenza_peso_contratto > 0:
+                valore_totale = differenza_peso_contratto * prezzo_vendita_medio
+                if contratto.percentuale_soccidante:
+                    percentuale_soccidario = Decimal(100) - to_decimal(contratto.percentuale_soccidante)
+                elif contratto.percentuale_riparto_base:
+                    percentuale_soccidario = to_decimal(contratto.percentuale_riparto_base)
+                else:
+                    percentuale_soccidario = Decimal(50)
+                valore_contratto = valore_totale * percentuale_soccidario / 100
+
+        if (
+            contratto.bonus_incremento_attivo
+            and contratto.bonus_incremento_kg_soglia
+            and contratto.bonus_incremento_percentuale
+            and len(entries) > 0
+        ):
+            peso_medio_per_capo = differenza_peso_contratto / len(entries)
+            soglia = to_decimal(contratto.bonus_incremento_kg_soglia)
+            if peso_medio_per_capo > soglia:
+                valore_contratto += valore_contratto * to_decimal(contratto.bonus_incremento_percentuale) / 100
+
+        totale_peso_arrivo_soccida += peso_arrivo_contratto
+        totale_peso_uscita_soccida += peso_uscita_contratto
+        totale_differenza_peso_soccida += differenza_peso_contratto
+        totale_valore_soccida += valore_contratto
+
+        dettaglio_soccida.append({
+            "contratto_id": contratto_id,
+            "numero_contratto": contratto.numero_contratto,
+            "soccidante": contratto.soccidante.nome if contratto.soccidante else "N/A",
+            "modalita_remunerazione": contratto.modalita_remunerazione,
+            "prezzo_per_kg": round(float(contratto.prezzo_per_kg), 2) if contratto.prezzo_per_kg else None,
+            "quota_giornaliera": round(float(contratto.quota_giornaliera), 2) if contratto.quota_giornaliera else None,
+            "percentuale_remunerazione": round(float(contratto.percentuale_remunerazione), 2) if contratto.percentuale_remunerazione else None,
+            "percentuale_soccidante": float(contratto.percentuale_soccidante) if contratto.percentuale_soccidante else None,
+            "percentuale_riparto_base": round(float(contratto.percentuale_riparto_base), 2) if contratto.percentuale_riparto_base else None,
+            "percentuale_aggiunta_arrivo": round(float(contratto.percentuale_aggiunta_arrivo), 2) if contratto.percentuale_aggiunta_arrivo else None,
+            "percentuale_sottrazione_uscita": round(float(contratto.percentuale_sottrazione_uscita), 2) if contratto.percentuale_sottrazione_uscita else None,
+            "giorni_gestione": giorni_gestione,
+            "numero_capi": len(entries),
+            "peso_arrivo_originale_totale": round(float(peso_arrivo_originale_contratto), 2),
+            "peso_arrivo_totale": round(float(peso_arrivo_contratto), 2),
+            "peso_uscita_originale_totale": round(float(peso_uscita_originale_contratto), 2),
+            "peso_uscita_totale": round(float(peso_uscita_contratto), 2),
+            "differenza_peso_totale": round(float(differenza_peso_contratto), 2),
+            "valore_totale": round(float(valore_contratto), 2),
+        })
+
+    riepilogo_soccida = {
+        "numero_contratti": len(dettaglio_soccida),
+        "numero_capi": sum(len(e) for e in animali_per_contratto.values()),
+        "peso_arrivo": round(float(totale_peso_arrivo_soccida), 2),
+        "peso_uscita": round(float(totale_peso_uscita_soccida), 2),
+        "differenza_peso": round(float(totale_differenza_peso_soccida), 2),
+        "valore_totale": round(float(totale_valore_soccida), 2),
+        "dettaglio_contratti": dettaglio_soccida,
+    }
+
+    return {
+        "riepilogo_proprieta": riepilogo_proprieta,
+        "riepilogo_soccida": riepilogo_soccida,
     }
 
 
