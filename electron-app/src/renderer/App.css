@@ -160,8 +160,8 @@ body {
    ============================================ */
 
 /* Stili base per tutti i pulsanti */
-/* NOTA: .menu-button, .sidebar-toggle, .nav-item e .toggle-button sono esclusi per mantenere il design originale della linguetta, l'allineamento a sinistra della sidebar e le dimensioni personalizzate dei toggle */
-button:not(.menu-button):not(.sidebar-toggle):not(.nav-item):not(.toggle-button),
+/* NOTA: .menu-button, .sidebar-toggle, .nav-item, .toggle-button e .report-tipo-card sono esclusi per mantenere dimensioni/design personalizzati */
+button:not(.menu-button):not(.sidebar-toggle):not(.nav-item):not(.toggle-button):not(.report-tipo-card),
 .btn,
 .btn-primary,
 .btn-secondary,
@@ -188,7 +188,7 @@ button:not(.menu-button):not(.sidebar-toggle):not(.nav-item):not(.toggle-button)
 }
 
 /* Padding standard per pulsanti normali */
-button:not(.btn-icon):not(.btn-close):not(.close-button):not(.close-btn):not(.btn-small),
+button:not(.btn-icon):not(.btn-close):not(.close-button):not(.close-btn):not(.btn-small):not(.report-tipo-card),
 .btn:not(.btn-icon):not(.btn-small),
 .btn-primary:not(.btn-icon):not(.btn-small),
 .btn-secondary:not(.btn-icon):not(.btn-small),

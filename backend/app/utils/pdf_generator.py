@@ -9,6 +9,8 @@ from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import mm
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
     Table,
     TableStyle,
@@ -16,6 +18,7 @@ from reportlab.platypus import (
     Spacer,
     PageBreak,
     KeepTogether,
+    Flowable,
 )
 
 from app.utils.pdf_layout import create_document, build_pdf, branding_from_azienda
@@ -1781,6 +1784,47 @@ def generate_ddt_emesso_pdf(ddt_data, branding=None):
     branding_config.setdefault("report_title", "DOCUMENTO DI TRASPORTO")
     branding_config.setdefault("report_subtitle", "")
     
+    # Preferisci Arial (se registrabile), altrimenti Helvetica (sempre disponibile in ReportLab)
+    def _get_ddt_font_pair():
+        registered = set(pdfmetrics.getRegisteredFontNames() or [])
+        if "Arial" in registered and "Arial-Bold" in registered:
+            return "Arial", "Arial-Bold"
+
+        # Candidati comuni (macOS / Linux). Se non presenti, fallback a Helvetica.
+        arial_candidates = (
+            "/Library/Fonts/Arial.ttf",
+            "/System/Library/Fonts/Supplemental/Arial.ttf",
+            "/usr/share/fonts/truetype/msttcorefonts/Arial.ttf",
+            "/usr/share/fonts/truetype/msttcorefonts/arial.ttf",
+            "/usr/share/fonts/truetype/msttcorefonts/Arial.ttf",
+        )
+        arial_bold_candidates = (
+            "/Library/Fonts/Arial Bold.ttf",
+            "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
+            "/usr/share/fonts/truetype/msttcorefonts/Arial_Bold.ttf",
+            "/usr/share/fonts/truetype/msttcorefonts/arialbd.ttf",
+            "/usr/share/fonts/truetype/msttcorefonts/Arialbd.ttf",
+        )
+
+        arial_path = next((p for p in arial_candidates if p and __import__("os").path.isfile(p)), None)
+        arial_bold_path = next((p for p in arial_bold_candidates if p and __import__("os").path.isfile(p)), None)
+
+        if arial_path and arial_bold_path:
+            try:
+                if "Arial" not in registered:
+                    pdfmetrics.registerFont(TTFont("Arial", arial_path))
+                if "Arial-Bold" not in registered:
+                    pdfmetrics.registerFont(TTFont("Arial-Bold", arial_bold_path))
+                return "Arial", "Arial-Bold"
+            except Exception:
+                pass
+
+        return "Helvetica", "Helvetica-Bold"
+
+    font_regular, font_bold = _get_ddt_font_pair()
+    body_font_size = 9
+    section_title_font_size = 10
+
     # Styles
     styles = getSampleStyleSheet()
     title_style = ParagraphStyle(
@@ -1796,17 +1840,19 @@ def generate_ddt_emesso_pdf(ddt_data, branding=None):
     normal_style = ParagraphStyle(
         'DDTNormal',
         parent=styles['Normal'],
-        fontSize=10,
+        fontName=font_regular,
+        fontSize=body_font_size,
         textColor=colors.black,
-        spaceAfter=4
+        spaceAfter=3,
+        leading=11,
     )
     
     label_style = ParagraphStyle(
         'DDTLabel',
         parent=styles['Normal'],
-        fontSize=9,
+        fontName=font_bold,
+        fontSize=section_title_font_size,
         textColor=colors.HexColor('#333333'),
-        fontName='Helvetica-Bold',
         spaceAfter=2
     )
     
@@ -1814,9 +1860,9 @@ def generate_ddt_emesso_pdf(ddt_data, branding=None):
     destinatario_title_style = ParagraphStyle(
         'DDTDestinatarioTitle',
         parent=styles['Normal'],
-        fontSize=12,
+        fontName=font_bold,
+        fontSize=section_title_font_size,
         textColor=colors.black,
-        fontName='Helvetica-Bold',
         spaceAfter=1
     )
     
@@ -1824,10 +1870,11 @@ def generate_ddt_emesso_pdf(ddt_data, branding=None):
     vettore_style = ParagraphStyle(
         'DDTVettore',
         parent=styles['Normal'],
-        fontSize=8,
+        fontName=font_regular,
+        fontSize=body_font_size,
         textColor=colors.HexColor('#555555'),
         spaceAfter=1,
-        leading=9
+        leading=10,
     )
     
     # Stile per riferimenti legali (piccolo e discreto, interlinea minima)
@@ -1857,38 +1904,13 @@ def generate_ddt_emesso_pdf(ddt_data, branding=None):
     # Riferimenti legali (piccoli, subito sotto il titolo, interlinea minima)
     legal_refs = "D.P.R. 472/1996 - D.Lgs. 231/2007 - Art. 1, c. 2, D.Lgs. 127/2015"
     story.append(Paragraph(legal_refs, legal_style))
-    story.append(Spacer(1, 6*mm))  # Aumentato spazio tra DOCUMENTO DI TRASPORTO e DOCUMENTO N.
-    
-    # Numero documento e data (appena sotto la linea dell'header, allineato a destra)
-    numero_data_text = f"DOCUMENTO N. {ddt.numero or 'N/A'} - DEL {ddt.data.strftime('%d/%m/%Y') if hasattr(ddt.data, 'strftime') else str(ddt.data)}"
-    # Usa una tabella con colonna vuota a sinistra e numero documento a destra
-    available_width = doc.width
-    numero_table = Table([
-        ['', Paragraph(numero_data_text, ParagraphStyle(
-            'DDTNumeroData',
-            parent=normal_style,
-            fontSize=10,
-            fontName='Helvetica-Bold',
-            alignment=TA_LEFT,
-            spaceAfter=0
-        ))]
-    ], colWidths=[available_width * 0.5, available_width * 0.5])
-    numero_table.setStyle(TableStyle([
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 0),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
-        ('TOPPADDING', (0, 0), (-1, -1), 0),
-    ]))
-    story.append(numero_table)
-    story.append(Spacer(1, 3*mm))  # Ridotto da 6mm
+    story.append(Spacer(1, 4 * mm))
     
     # Destinatario come lettera (posizionato a destra ma allineato a sinistra)
     destinatario_style = ParagraphStyle(
         'DDTDestinatario',
         parent=normal_style,
-        fontSize=11,
+        fontSize=body_font_size,
         textColor=colors.black,
         alignment=TA_LEFT,
         spaceAfter=2
@@ -1923,13 +1945,11 @@ def generate_ddt_emesso_pdf(ddt_data, branding=None):
             # Se non c'è provincia tra parentesi, applica solo title()
             return luogo.title()
     
-    # Costruisci il testo del destinatario come una lettera
-    destinatario_lines = []
+    # Costruisci il blocco destinatario con titolo DESTINATARIO
+    destinatario_lines = [f"<font size='{section_title_font_size}'><b>DESTINATARIO</b></font>"]
     if ddt.destinatario_nome:
         nome_capitalized = capitalize_name(ddt.destinatario_nome)
-        destinatario_lines.append(f"Spett.le <b>{nome_capitalized}</b>,")
-    else:
-        destinatario_lines.append("Spett.le")
+        destinatario_lines.append(f"<font size='{body_font_size}'><b>{nome_capitalized}</b></font>")
     if ddt.destinatario_indirizzo:
         destinatario_lines.append(capitalize_name(ddt.destinatario_indirizzo))
     if ddt.destinatario_cap and ddt.destinatario_comune:
@@ -1945,26 +1965,42 @@ def generate_ddt_emesso_pdf(ddt_data, branding=None):
     
     # Unisci tutte le righe con <br/> per formattare come lettera
     destinatario_text = "<br/>".join(destinatario_lines)
-    
-    # Tabella con destinatario allineato alla stessa posizione di VETTORE (50% della larghezza)
-    # VETTORE è nella colonna destra della tabella trasporto/data (50% della larghezza)
-    # Quindi Spett.le deve iniziare al 50% della larghezza disponibile
+
+    # D.D.T. n. ... e data (a capo) affiancati al destinatario (stessa altezza)
+    data_str = ddt.data.strftime('%d/%m/%Y') if hasattr(ddt.data, 'strftime') else str(ddt.data)
+    ddt_info_text = (
+        f"<font size='{section_title_font_size}'><b>D.D.T. n. {ddt.numero or 'N/A'}</b></font><br/>"
+        f"<font size='{section_title_font_size}'><b>del {data_str}</b></font>"
+    )
+    ddt_info_style = ParagraphStyle(
+        "DDTInfo",
+        parent=normal_style,
+        fontName=font_bold,
+        fontSize=section_title_font_size,
+        leading=11,
+        spaceAfter=0,
+        alignment=TA_LEFT,
+    )
+
     available_width = doc.width
-    destinatario_table = Table([
-        ['', Paragraph(destinatario_text, destinatario_style)]
-    ], colWidths=[available_width * 0.5, available_width * 0.5])
-    destinatario_table.setStyle(TableStyle([
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('ALIGN', (1, 0), (1, 0), 'LEFT'),
-        ('LEFTPADDING', (0, 0), (0, 0), 0),
-        ('RIGHTPADDING', (0, 0), (0, 0), 0),
-        ('LEFTPADDING', (1, 0), (1, 0), 0),
-        ('RIGHTPADDING', (1, 0), (1, 0), 0),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
-        ('TOPPADDING', (0, 0), (-1, -1), 0),
-    ]))
-    story.append(destinatario_table)
-    story.append(Spacer(1, 2*mm))  # Spazio dopo destinatario
+    ddt_dest_table = Table(
+        [[Paragraph(ddt_info_text, ddt_info_style), Paragraph(destinatario_text, destinatario_style)]],
+        colWidths=[available_width * 0.5, available_width * 0.5],
+    )
+    ddt_dest_table.setStyle(
+        TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+                ("TOPPADDING", (0, 0), (-1, -1), 0),
+            ]
+        )
+    )
+    story.append(ddt_dest_table)
+    story.append(Spacer(1, 2 * mm))
     
     # Luogo di destinazione e Causale trasporto affiancati 50/50
     available_width = doc.width
@@ -1973,16 +2009,28 @@ def generate_ddt_emesso_pdf(ddt_data, branding=None):
     # Colonna sinistra: Causale trasporto
     causale_text = ""
     if ddt.causale_trasporto:
-        causale_text = f"<b>CAUSALE DEL TRASPORTO</b><br/>{capitalize_name(ddt.causale_trasporto)}"
+        causale_text = (
+            f"<font size='{section_title_font_size}'><b>CAUSALE DEL TRASPORTO</b></font><br/>"
+            f"<font size='{body_font_size}'>{capitalize_name(ddt.causale_trasporto)}</font>"
+        )
     else:
-        causale_text = "<b>CAUSALE DEL TRASPORTO</b><br/>-"
+        causale_text = (
+            f"<font size='{section_title_font_size}'><b>CAUSALE DEL TRASPORTO</b></font><br/>"
+            f"<font size='{body_font_size}'>-</font>"
+        )
     
     # Colonna destra: Luogo di destinazione
     luogo_text = ""
     if ddt.luogo_destinazione:
-        luogo_text = f"<b>LUOGO DI DESTINAZIONE:</b><br/>{format_luogo_destinazione(ddt.luogo_destinazione)}"
+        luogo_text = (
+            f"<font size='{section_title_font_size}'><b>LUOGO DI DESTINAZIONE</b></font><br/>"
+            f"<font size='{body_font_size}'>{format_luogo_destinazione(ddt.luogo_destinazione)}</font>"
+        )
     else:
-        luogo_text = "<b>LUOGO DI DESTINAZIONE:</b><br/>-"
+        luogo_text = (
+            f"<font size='{section_title_font_size}'><b>LUOGO DI DESTINAZIONE</b></font><br/>"
+            f"<font size='{body_font_size}'>-</font>"
+        )
     
     causale_luogo_table = Table([
         [Paragraph(causale_text, normal_style), Paragraph(luogo_text, normal_style)]
@@ -1998,11 +2046,12 @@ def generate_ddt_emesso_pdf(ddt_data, branding=None):
     ]))
     story.append(causale_luogo_table)
     
-    story.append(Spacer(1, 2*mm))  # Ridotto da 4mm
+    # Leggermente più aria tra testo e tabella
+    story.append(Spacer(1, 3 * mm))
     
     # Tabella articoli/beni (sempre presente, con minimo 10 righe vuote)
     articoli = ddt.articoli if ddt.articoli else []
-    articoli_data = [['DESCRIZIONE DEI BENI', 'Unità di misura', 'Quantità']]
+    articoli_data = [['DESCRIZIONE', 'U.M.', 'Q.tà']]
     
     # Aggiungi gli articoli esistenti
     for articolo in articoli:
@@ -2021,20 +2070,19 @@ def generate_ddt_emesso_pdf(ddt_data, branding=None):
     for _ in range(num_righe_vuote):
         articoli_data.append(['', '', ''])
     
-    # Calcola larghezze colonne basandosi sulla larghezza disponibile del documento
-    # La tabella deve essere contenuta entro i bordi definiti dall'header
-    available_width = doc.width  # Larghezza disponibile (già meno margini)
-    # Proporzioni: descrizione 60%, unità 20%, quantità 20%
-    desc_width = available_width * 0.6
-    uom_width = available_width * 0.2
-    qty_width = available_width * 0.2
+    # Calcola larghezze colonne: 70% descrizione, 15% UM, 15% Q.tà
+    available_width = doc.width
+    desc_width = available_width * 0.70
+    uom_width = available_width * 0.15
+    qty_width = available_width * 0.15
     
     articoli_table = Table(articoli_data, colWidths=[desc_width, uom_width, qty_width])
     articoli_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4a4a4a')),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTNAME', (0, 0), (-1, 0), font_bold),
         ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('FONTNAME', (0, 1), (-1, -1), font_regular),
         ('FONTSIZE', (0, 1), (-1, -1), 9),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 4),  # Ridotto da 6
         ('TOPPADDING', (0, 0), (-1, -1), 4),  # Ridotto da 6
@@ -2049,7 +2097,7 @@ def generate_ddt_emesso_pdf(ddt_data, branding=None):
         ('LINEJOIN', (0, 0), (-1, -1), 1),  # 1 = round join
     ]))
     story.append(articoli_table)
-    story.append(Spacer(1, 2*mm))  # Ridotto da 4mm
+    story.append(Spacer(1, 3 * mm))
     
     # Sezione trasporto, data ritiro e vettore in 2 colonne
     # Colonna sinistra: Trasporto a mezzo e Data ritiro
@@ -2065,18 +2113,27 @@ def generate_ddt_emesso_pdf(ddt_data, branding=None):
         elif ddt.trasporto_a_mezzo == 'destinatario':
             trasporto_value = "Destinatario"
     
-    left_col_parts.append(f"<b>TRASPORTO A MEZZO</b><br/>{trasporto_value if trasporto_value else '-'}")
+    left_col_parts.append(
+        f"<font size='{section_title_font_size}'><b>TRASPORTO A MEZZO</b></font><br/>"
+        f"<font size='{body_font_size}'>{trasporto_value if trasporto_value else '-'}</font>"
+    )
     
     # Data ritiro (sotto trasporto a mezzo, titolo in MAIUSCOLO, valore a capo)
     if ddt.data_ritiro:
         data_ritiro_str = ddt.data_ritiro.strftime('%d/%m/%Y') if hasattr(ddt.data_ritiro, 'strftime') else str(ddt.data_ritiro)
-        left_col_parts.append(f"<b>DATA RITIRO</b><br/>{data_ritiro_str}")
+        left_col_parts.append(
+            f"<font size='{section_title_font_size}'><b>DATA E ORA RITIRO</b></font><br/>"
+            f"<font size='{body_font_size}'>{data_ritiro_str}</font>"
+        )
     else:
-        left_col_parts.append(f"<b>DATA RITIRO</b><br/>-")
+        left_col_parts.append(
+            f"<font size='{section_title_font_size}'><b>DATA E ORA RITIRO</b></font><br/>"
+            f"<font size='{body_font_size}'>-</font>"
+        )
     
     # Colonna destra: Vettore (sempre presente il titolo)
     right_col_parts = []
-    right_col_parts.append("<b>VETTORE</b>")
+    right_col_parts.append(f"<font size='{section_title_font_size}'><b>VETTORE</b></font>")
     
     # Dati vettore (solo se trasporto a mezzo è vettore)
     if ddt.trasporto_a_mezzo == 'vettore' and getattr(ddt, 'vettore_ragione_sociale', None):
@@ -2096,11 +2153,11 @@ def generate_ddt_emesso_pdf(ddt_data, branding=None):
         
         if vettore_info:
             vettore_text = "<br/>".join(vettore_info)
-            right_col_parts.append(f"<i>{vettore_text}</i>")
+            right_col_parts.append(f"<font size='{body_font_size}'><i>{vettore_text}</i></font>")
         else:
-            right_col_parts.append("-")
+            right_col_parts.append(f"<font size='{body_font_size}'>-</font>")
     else:
-        right_col_parts.append("-")
+        right_col_parts.append(f"<font size='{body_font_size}'>-</font>")
     
     # Crea tabella a 2 colonne
     left_text = "<br/><br/>".join(left_col_parts)
@@ -2130,9 +2187,15 @@ def generate_ddt_emesso_pdf(ddt_data, branding=None):
     
     # Aspetto dei beni (allineato alla colonna sinistra come DATA RITIRO)
     if ddt.aspetto_beni:
-        aspetto_text = f"<b>ASPETTO DEI BENI</b><br/>{capitalize_name(ddt.aspetto_beni)}"
+        aspetto_text = (
+            f"<font size='{section_title_font_size}'><b>ASPETTO DEI BENI</b></font><br/>"
+            f"<font size='{body_font_size}'>{capitalize_name(ddt.aspetto_beni)}</font>"
+        )
     else:
-        aspetto_text = "<b>ASPETTO DEI BENI</b><br/>-"
+        aspetto_text = (
+            f"<font size='{section_title_font_size}'><b>ASPETTO DEI BENI</b></font><br/>"
+            f"<font size='{body_font_size}'>-</font>"
+        )
     
     aspetto_table = Table([
         [Paragraph(aspetto_text, normal_style), '']
@@ -2150,9 +2213,15 @@ def generate_ddt_emesso_pdf(ddt_data, branding=None):
     
     # Annotazioni (allineato alla colonna sinistra come DATA RITIRO)
     if ddt.annotazioni:
-        annotazioni_text = f"<b>ANNOTAZIONI</b><br/>{capitalize_name(ddt.annotazioni)}"
+        annotazioni_text = (
+            f"<font size='{section_title_font_size}'><b>ANNOTAZIONI</b></font><br/>"
+            f"<font size='{body_font_size}'>{capitalize_name(ddt.annotazioni)}</font>"
+        )
     else:
-        annotazioni_text = "<b>ANNOTAZIONI</b><br/>-"
+        annotazioni_text = (
+            f"<font size='{section_title_font_size}'><b>ANNOTAZIONI</b></font><br/>"
+            f"<font size='{body_font_size}'>-</font>"
+        )
     
     annotazioni_table = Table([
         [Paragraph(annotazioni_text, normal_style), '']
@@ -2168,19 +2237,16 @@ def generate_ddt_emesso_pdf(ddt_data, branding=None):
     story.append(annotazioni_table)
     story.append(Spacer(1, 2*mm))  # Ridotto da 4mm
     
-    # Spacer dinamico per spingere le firme in fondo (ridotto per evitare nuova pagina)
-    # Calcola lo spazio necessario per mantenere tutto su una pagina
-    story.append(Spacer(1, 10*mm))  # Ridotto ulteriormente per comprimere tutto su una pagina
-    
-    # Firma (tre righe) - testo allineato a sinistra, più piccolo
+    # Firma (tre righe) - testo allineato a sinistra
     firma_style = ParagraphStyle(
         'DDTFirma',
         parent=styles['Normal'],
-        fontSize=7,
+        fontName=font_regular,
+        fontSize=body_font_size,
         textColor=colors.black,
         alignment=TA_LEFT,
         spaceAfter=0,
-        leading=8
+        leading=11,
     )
     
     # Calcola larghezze colonne basandosi sulla larghezza disponibile del documento
@@ -2194,13 +2260,35 @@ def generate_ddt_emesso_pdf(ddt_data, branding=None):
     firma_table.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+        ('FONTNAME', (0, 0), (-1, -1), font_regular),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 30),
         ('TOPPADDING', (0, 0), (-1, -1), 4),
         ('LEFTPADDING', (0, 0), (-1, -1), 4),
         ('RIGHTPADDING', (0, 0), (-1, -1), 4),
         ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#666666')),
     ]))
+
+    # Spingi le firme a fondo pagina (attaccate al footer, ma senza sovrapposizione)
+    class _FillRemainingSpace(Flowable):
+        def __init__(self, bottom_flowable, gap=0):
+            super().__init__()
+            self._bottom = bottom_flowable
+            self._gap = gap
+            self._height = 0
+
+        def wrap(self, availWidth, availHeight):
+            try:
+                _, bottom_h = self._bottom.wrap(availWidth, availHeight)
+            except Exception:
+                bottom_h = 0
+            self._height = max(0, availHeight - bottom_h - self._gap)
+            return (availWidth, self._height)
+
+        def draw(self):
+            # Nessun disegno: è solo spazio verticale "elastico"
+            return
+
+    story.append(_FillRemainingSpace(firma_table, gap=1.5 * mm))
     story.append(firma_table)
     
     # Genera PDF

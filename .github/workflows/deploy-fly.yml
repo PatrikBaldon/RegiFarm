@@ -16,7 +16,10 @@ jobs:
   deploy:
     name: Deploy Backend to Fly.io
     runs-on: ubuntu-latest
-    
+    env:
+      # Token Fly.io: crealo da https://fly.io/user/tokens e aggiungilo come secret nel repo
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -28,13 +31,9 @@ jobs:
         run: |
           cd backend
           flyctl deploy --remote-only
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
       - name: Verify deployment
         run: |
           sleep 10  # Attendi che l'app sia pronta
           flyctl status --app regifarm-backend
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 

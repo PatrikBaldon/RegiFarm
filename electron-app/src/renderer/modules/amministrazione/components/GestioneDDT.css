@@ -72,8 +72,19 @@
 
 .ddt-modal-tabs {
   display: flex;
-  border-bottom: none; /* Rimossa la linea sotto */
-  margin-bottom: 1rem; /* Ridotto da 1.5rem */
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+/* Tab nel body (se usate altrove): mantieni margine sotto */
+.ddt-form .ddt-modal-tabs {
+  margin-bottom: 1rem;
+}
+
+/* Tab nell'header della modale: senza margine, allineate */
+.base-modal-header .ddt-modal-tabs {
+  margin-bottom: 0;
+  margin-left: 12px;
 }
 
 .ddt-tab {

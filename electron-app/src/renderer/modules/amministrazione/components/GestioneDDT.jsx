@@ -762,6 +762,44 @@ const GestioneDDT = () => {
         title={ddtModalData ? (isEditing ? 'Modifica DDT' : 'Dettagli DDT') : 'Nuovo DDT'}
         identifier={ddtModalData?.numero ? `DDT ${ddtModalData.numero}` : null}
         size="xlarge"
+        headerLeft={
+          <>
+            <span className="base-modal-title">
+              {ddtModalData ? (isEditing ? 'Modifica DDT' : 'Dettagli DDT') : 'Nuovo DDT'}
+              {ddtModalData?.numero && <span className="base-modal-identifier"> — {ddtModalData.numero}</span>}
+            </span>
+            <div className="base-modal-tabs ddt-modal-tabs">
+              <button
+                type="button"
+                className={`ddt-tab ${activeTab === 'header' ? 'active' : ''}`}
+                onClick={() => setActiveTab('header')}
+              >
+                Intestazione
+              </button>
+              <button
+                type="button"
+                className={`ddt-tab ${activeTab === 'trasporto' ? 'active' : ''}`}
+                onClick={() => setActiveTab('trasporto')}
+              >
+                Trasporto
+              </button>
+              <button
+                type="button"
+                className={`ddt-tab ${activeTab === 'articoli' ? 'active' : ''}`}
+                onClick={() => setActiveTab('articoli')}
+              >
+                Articoli
+              </button>
+              <button
+                type="button"
+                className={`ddt-tab ${activeTab === 'annotazioni' ? 'active' : ''}`}
+                onClick={() => setActiveTab('annotazioni')}
+              >
+                Annotazioni
+              </button>
+            </div>
+          </>
+        }
         headerActions={
           <>
             {!isEditing && ddtModalData && (
@@ -837,39 +875,7 @@ const GestioneDDT = () => {
         {ddtModalLoading && <div className="loading">Caricamento dettagli...</div>}
         {!ddtModalLoading && (
           <form onSubmit={(e) => { e.preventDefault(); handleSaveDDT(false); }} className="ddt-form">
-            {/* Tabs */}
-            <div className="ddt-modal-tabs">
-              <button
-                type="button"
-                className={`ddt-tab ${activeTab === 'header' ? 'active' : ''}`}
-                onClick={() => setActiveTab('header')}
-              >
-                Intestazione
-              </button>
-              <button
-                type="button"
-                className={`ddt-tab ${activeTab === 'trasporto' ? 'active' : ''}`}
-                onClick={() => setActiveTab('trasporto')}
-              >
-                Trasporto
-              </button>
-              <button
-                type="button"
-                className={`ddt-tab ${activeTab === 'articoli' ? 'active' : ''}`}
-                onClick={() => setActiveTab('articoli')}
-              >
-                Articoli
-              </button>
-              <button
-                type="button"
-                className={`ddt-tab ${activeTab === 'annotazioni' ? 'active' : ''}`}
-                onClick={() => setActiveTab('annotazioni')}
-              >
-                Annotazioni
-              </button>
-            </div>
-
-            {/* Tab Content */}
+            {/* Tab Content - le tab sono nell'header della modale */}
             <div className="ddt-tab-content">
               {activeTab === 'header' && (
                 <div className="form-grid">

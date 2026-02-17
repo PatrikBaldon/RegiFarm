@@ -144,7 +144,7 @@
 .report-allevamento-sections .simple-select-menu,
 .report-allevamento-sections .simple-select-menu-fixed {
   z-index: 10000;
-  max-height: 280px;
+  max-height: min(180px, 35vh);
   overflow-y: auto;
 }
 .report-allevamento-sections select {
@@ -275,8 +275,8 @@
 .report-tipo-card {
   flex: 1 1 200px;
   min-width: 240px;
-  min-height: 100px;
-  padding: 22px 20px;
+  min-height: 30px;
+  padding: 8px 20px;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
   background: #fff;
@@ -287,7 +287,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 .report-tipo-card:hover {
