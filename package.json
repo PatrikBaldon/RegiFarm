@@ -30,6 +30,7 @@
     "lint:fix": "eslint electron-app/src --ext .js,.jsx --fix",
     "format": "prettier --write \"electron-app/src/**/*.{js,jsx,json,css}\"",
     "check": "npm run lint && npm run test",
+    "icons": "python3 scripts/generate_app_icons.py",
     "clean": "rimraf dist build electron-app/output && hdiutil detach /Volumes/RegiFarm\\ Pro 2>/dev/null || true",
     "clean:build": "rimraf dist/mac dist/mac-arm64",
     "clean:frontend": "rimraf electron-app/output node_modules/.cache/webpack",

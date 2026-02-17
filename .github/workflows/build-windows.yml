@@ -27,11 +27,6 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
       - name: Install npm dependencies
         run: npm ci
 
@@ -48,6 +43,12 @@ jobs:
 
       - name: Build frontend
         run: npm run build:frontend
+
+      - name: Generate app icons (solo Node, senza Pillow)
+        run: |
+          npx --yes electron-icon-builder --input RegiFarm_Logo.png --output build
+          Copy-Item build\icons\win\icon.ico build\icon.ico
+          Copy-Item build\icons\mac\icon.icns build\icon.icns
 
       - name: Build Windows installer
         run: npx electron-builder --win
@@ -76,11 +77,6 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
       - name: Install npm dependencies
         run: npm ci
 
@@ -97,6 +93,12 @@ jobs:
 
       - name: Build frontend
         run: npm run build:frontend
+
+      - name: Generate app icons (solo Node, senza Pillow)
+        run: |
+          npx --yes electron-icon-builder --input RegiFarm_Logo.png --output build
+          cp build/icons/win/icon.ico build/icon.ico
+          cp build/icons/mac/icon.icns build/icon.icns
 
       - name: Build Mac installer
         run: npm run build:mac
